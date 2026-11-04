@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Costruire la mente</title>
+<style>
+  :root { --bg:#0E0F12; --fg:#F2EFE9; --mute:#8F8C85; --amber:#E9B44C; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { min-height:100%; background:var(--bg); color:var(--fg); }
+  body {
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2rem; padding:2rem 16px; text-align:center; font-family: Georgia, "Times New Roman", serif;
+  }
+  h1 { font-weight:400; font-size:clamp(2rem,5vw,3.6rem); }
+  p { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size:clamp(.8rem,1.5vw,1rem); color:var(--mute); letter-spacing:.2em; text-transform:uppercase; margin-top:-1.2rem; }
+  .row { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; }
+  a {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size:.95rem; letter-spacing:.2em; text-transform:uppercase; text-decoration:none;
+    border-radius:999px; padding:1rem 2.4rem; border:1px solid var(--mute); color:var(--fg);
+  }
+  a.main { color:var(--bg); background:var(--amber); border-color:var(--amber); }
+  a:hover { filter:brightness(1.12); }
+  a:focus-visible { outline:2px solid var(--fg); outline-offset:4px; }
+  small { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size:.8rem; color:var(--mute); max-width:34rem; line-height:1.5; }
+</style>
+</head>
+<body>
+  <h1>Costruire la mente</h1>
+  <p>Introduzione al neurocostruttivismo</p>
+  <div class="row">
+    <a class="main" href="versione-breve.html">Introduzione · 1 minuto</a>
+    <a href="versione-completa.html">Versione completa · 3 minuti</a>
+  </div>
+  <small>L'introduzione ha la voce registrata e i sottotitoli di riserva. Per proiettarla usa Chrome o Safari a schermo intero.</small>
+</body>
+</html>

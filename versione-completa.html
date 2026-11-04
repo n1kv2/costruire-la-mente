@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Costruire la mente</title>
+<style>
+  :root { --bg:#0E0F12; --fg:#F2EFE9; --mute:#8F8C85; --amber:#E9B44C; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { width:100%; height:100%; background:var(--bg); overflow:hidden; }
+  canvas { position:fixed; inset:0; width:100%; height:100%; display:block; }
+  body.idle { cursor:none; }
+  #start {
+    position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:2.2rem; background:var(--bg); color:var(--fg); transition:opacity .9s ease; z-index:2;
+    font-family: Georgia, "Times New Roman", serif; padding:0 16px; text-align:center;
+  }
+  #start.gone { opacity:0; pointer-events:none; }
+  #start h1 { font-weight:400; font-size:clamp(2rem,5vw,3.6rem); letter-spacing:.01em; }
+  #start p { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size:clamp(.8rem,1.5vw,1rem); color:var(--mute); letter-spacing:.2em; text-transform:uppercase; margin-top:-1.4rem; }
+  #start small { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size:.75rem; color:var(--mute); letter-spacing:.08em; opacity:.7; }
+  #go {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size:1rem; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--bg); background:var(--amber); border:0; padding:1rem 2.8rem; border-radius:999px; cursor:pointer;
+  }
+  #go:hover { filter:brightness(1.1); }
+  #go:focus-visible { outline:2px solid var(--fg); outline-offset:4px; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Animazione: dal dibattito tra innatismo ed empirismo a Piaget e al neurocostruttivismo"></canvas>
+<div id="start">
+  <h1>Costruire la mente</h1>
+  <p>Da Platone a Piaget, fino al neurocostruttivismo</p>
+  <button id="go" type="button">Avvio</button>
+  <small>→ scena successiva · ← scena precedente · spazio pausa</small>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- colori e utilità ---------- */
+const BG="#0E0F12", FG="#F2EFE9", MUTE="#8F8C85", AMBER="#E9B44C", STEEL="#6B7A8F", STEEL_L="#93A6C2";
+const SERIF='Georgia, "Times New Roman", serif';
+const SANS='system-ui, -apple-system, "Segoe UI", sans-serif';
+const TAU=Math.PI*2;
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
+const seg=(T,a,b)=>smooth((T-a)/(b-a));              // 0→1 tra a e b
+const win=(T,a,b,fi=.8,fo=.8)=>Math.min(seg(T,a,a+fi),1-seg(T,b-fo,b)); // dentro/fuori
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+// fotogrammi chiave [[t,v],…]: valore interpolato morbidamente
+function track(T,keys){
+  if(T<=keys[0][0]) return keys[0][1];
+  for(let i=1;i<keys.length;i++) if(T<keys[i][0]){
+    const [t0,v0]=keys[i-1],[t1,v1]=keys[i]; return lerp(v0,v1,smooth((T-t0)/(t1-t0)));
+  }
+  return keys[keys.length-1][1];
+}
+
+/* ---------- canvas ---------- */
+const cv=document.getElementById("c"), ctx=cv.getContext("2d");
+let W=0,H=0,U=0,DPR=1;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth; H=window.innerHeight;
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  U=Math.min(W/16,H/9);
+}
+window.addEventListener("resize",resize); resize();
+const G=.76;                                   // linea del terreno (frazione di H)
+const STEPH=()=>U*.62;                         // altezza dei gradini
+
+/* ---------- testo ---------- */
+function wrap(text,maxW){
+  const words=text.split(" "), lines=[]; let cur="";
+  for(const w of words){
+    const test=cur?cur+" "+w:w;
+    if(ctx.measureText(test).width>maxW && cur){lines.push(cur);cur=w;} else cur=test;
+  }
+  if(cur) lines.push(cur); return lines;
+}
+function drawText(text,{y=.89,size=.46,font=SERIF,color=FG,alpha=1,maxW=.8,weight=400}={}){
+  if(alpha<=0.003) return;
+  const px=U*size;
+  ctx.save();
+  ctx.globalAlpha=alpha; ctx.fillStyle=color;
+  ctx.font=`${weight} ${px}px ${font}`;
+  ctx.textAlign="center"; ctx.textBaseline="middle";
+  const lines=wrap(text,W*maxW), lh=px*1.3;
+  const y0=H*y-(lines.length-1)*lh/2;
+  lines.forEach((l,i)=>ctx.fillText(l,W/2,y0+i*lh));
+  ctx.restore();
+}
+function label(text,x,y,{size=.24,font=SANS,color=MUTE,alpha=1,spacing=0,align="center",weight=400}={}){
+  if(alpha<=.003) return;
+  ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle=color;
+  ctx.font=`${weight} ${U*size}px ${font}`;
+  ctx.textAlign=align; ctx.textBaseline="middle";
+  if("letterSpacing" in ctx) ctx.letterSpacing=(U*spacing)+"px";
+  ctx.fillText(text,x,y); ctx.restore();
+}
+function rrect(x,y,w,h,r){
+  ctx.beginPath(); ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+function chip(text,x,y,color,alpha){
+  if(alpha<=.003) return;
+  ctx.save(); ctx.globalAlpha=alpha;
+  ctx.font=`500 ${U*.19}px ${SANS}`; if("letterSpacing" in ctx) ctx.letterSpacing=(U*.06)+"px";
+  const w=ctx.measureText(text).width+U*.5, h=U*.42;
+  ctx.strokeStyle=color; ctx.lineWidth=Math.max(1,U*.014); rrect(x-w/2,y-h/2,w,h,h/2); ctx.stroke();
+  ctx.fillStyle=color; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(text,x+U*.03,y+U*.01);
+  ctx.restore();
+}
+function glow(x,y,r,rgb,a){
+  if(a<=.003) return;
+  const g=ctx.createRadialGradient(x,y,0,x,y,r);
+  g.addColorStop(0,`rgba(${rgb},.5)`); g.addColorStop(1,`rgba(${rgb},0)`);
+  ctx.save(); ctx.globalAlpha=a; ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,TAU); ctx.fill(); ctx.restore();
+}
+const RGB_AMBER="233,180,76", RGB_STEEL="147,166,194";
+const lw=(k=1)=>Math.max(1.4,U*.022*k);
+
+/* ---------- copione del personaggino ---------- */
+const R0=.15;                                   // braccio a riposo
+const AX=[[0,-.08],[.4,-.08],[2.8,.12],[15.6,.12],[17.4,.15],[101.6,.15],[103.2,.38],[118.6,.38],
+  [119.6,.475],[120.8,.585],[122.0,.695],[123.2,.805],[124.8,.805],[125.3,.695],[125.8,.585],[126.3,.475],[126.8,.38],[128.4,.10]];
+const AY=[[0,0],[118.6,0],[119.6,1],[120.8,2],[122.0,3],[123.2,4],[124.8,4],[125.3,3],[125.8,2],[126.3,1],[126.8,0]];
+const AR=[[0,R0],[2.7,R0],[3.0,2.6],[3.8,2.6],[4.3,1.95],[10.3,1.95],[10.8,1.2],[15.2,1.2],[15.8,R0],
+  [21.3,R0],[21.8,1.8],[31.0,1.8],[31.5,R0],
+  [38.6,R0],[39.0,2.0],[49.0,2.0],[49.4,R0],
+  [52.1,R0],[52.5,2.0],[62.6,2.0],[63.0,R0],
+  [65.6,R0],[66.0,2.0],[76.0,2.0],[76.4,R0],
+  [79.1,R0],[79.5,2.0],[89.6,2.0],[90.0,R0],
+  [92.6,R0],[93.0,2.0],[101.2,2.0],[101.6,R0],
+  [103.2,R0],[103.6,2.5],[107.2,2.5],[107.6,R0],[108.0,1.9],[117.4,1.9],[117.9,R0],
+  [170.6,R0],[171.0,2.6],[173.4,2.6],[173.8,R0]];
+const AL=[[0,R0],[10.3,R0],[10.8,1.2],[15.2,1.2],[15.8,R0],[103.2,R0],[103.6,2.5],[107.2,2.5],[107.6,R0]];
+const BUILD=[[0,0],[103.4,0],[103.8,1],[107.0,1],[107.4,0]];
+const WV=[[0,0],[2.9,0],[3.1,1],[3.7,1],[3.9,0],[170.8,0],[171.1,1],[173.2,1],[173.6,0]];
+const LOOK=[[0,1],[10.3,1],[10.8,0],[15.2,0],[15.8,1]];
+const QM=[[0,0],[10.8,0],[11.3,1],[15.0,1],[15.6,0]];
+const TH=[[0,0],[93.0,0],[93.5,1],[97.4,1],[97.9,0],[152.0,0],[152.5,1],[157.0,1],[157.5,0]];
+// telecamera della linea del tempo (in larghezze di schermo)
+const CAM=[[0,-.75],[36,-.75],[38.5,0],[49.5,0],[52,.75],[63,.75],[65.5,1.5],[76.5,1.5],[79,2.25],[90,2.25],[92.5,3]];
+
+function drawAvatar(T){
+  const h=U*1.7, x=track(T,AX)*W, yG=H*G-track(T,AY)*STEPH();
+  if(x<-h) return;
+  const dist=t=>track(t,AX)*W+track(t,CAM)*W+track(t,AY)*STEPH();
+  const sp=Math.abs(dist(T+.05)-dist(T-.05))/.1;
+  const stride=clamp(sp/(h*1.2)), ph=dist(T)/(h*.22);
+  const sw=Math.sin(ph)*.45*stride, bob=-Math.abs(Math.cos(ph))*h*.025*stride;
+  const hipY=yG-h*.40+bob, shY=hipY-h*.30, hdY=shY-h*.155, hr=h*.135;
+  ctx.save(); ctx.strokeStyle=FG; ctx.fillStyle=FG; ctx.lineWidth=Math.max(2,h*.04); ctx.lineCap="round"; ctx.lineJoin="round";
+  for(const d of[1,-1]){                          // gambe
+    const a=d*sw; ctx.beginPath(); ctx.moveTo(x,hipY); ctx.lineTo(x+Math.sin(a)*h*.40,hipY-bob+Math.cos(a)*h*.40); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(x,hipY); ctx.lineTo(x,shY); ctx.stroke();
+  const build=track(T,BUILD)*Math.sin(T*6)*.35, wave=track(T,WV)*Math.sin(T*9)*.4;
+  const aR=track(T,AR)-sw*.9+wave+build, aL=track(T,AL)+sw*.9-build, sy=shY+h*.02, al=h*.30;
+  ctx.beginPath(); ctx.moveTo(x,sy); ctx.lineTo(x+Math.sin(aR)*al,sy+Math.cos(aR)*al); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x,sy); ctx.lineTo(x-Math.sin(aL)*al,sy+Math.cos(aL)*al); ctx.stroke();
+  ctx.fillStyle=AMBER;                            // foulard
+  ctx.beginPath(); ctx.moveTo(x-h*.075,shY-h*.012); ctx.lineTo(x+h*.075,shY-h*.012); ctx.lineTo(x+h*.01,shY+h*.075); ctx.closePath(); ctx.fill();
+  ctx.fillStyle=BG; ctx.beginPath(); ctx.arc(x,hdY,hr,0,TAU); ctx.fill(); ctx.stroke();
+  const ex=track(T,LOOK)*h*.035;
+  ctx.fillStyle=FG;
+  if(((T+.3)%3.7)<.13){
+    ctx.lineWidth=Math.max(1.4,h*.02);
+    for(const d of[-1,1]){ctx.beginPath();ctx.moveTo(x+ex+d*h*.045-h*.015,hdY-h*.015);ctx.lineTo(x+ex+d*h*.045+h*.015,hdY-h*.015);ctx.stroke();}
+  } else for(const d of[-1,1]){ctx.beginPath();ctx.arc(x+ex+d*h*.045,hdY-h*.015,h*.017,0,TAU);ctx.fill();}
+  ctx.lineWidth=Math.max(1.4,h*.022);
+  ctx.beginPath(); ctx.arc(x+ex*.8,hdY+h*.025,h*.045,.2*Math.PI,.8*Math.PI); ctx.stroke();
+  const qm=track(T,QM), th=track(T,TH);
+  if(qm>0) label("?",x+h*.06,hdY-h*.34,{size:.75,font:SERIF,color:AMBER,alpha:qm});
+  if(th>0){
+    const tx=x+h*.13, ty=hdY-h*.30;
+    glow(tx,ty,h*.2,RGB_AMBER,th);
+    ctx.globalAlpha=th; ctx.fillStyle=AMBER; ctx.beginPath(); ctx.arc(tx,ty,h*.045,0,TAU); ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ---------- icone ---------- */
+function headPath(cx,cy,r){                     // testa di profilo, guarda a destra
+  ctx.beginPath();
+  ctx.moveTo(cx-.22*r,cy+1.0*r);
+  ctx.quadraticCurveTo(cx-.25*r,cy+.62*r,cx-.70*r,cy+.42*r);
+  ctx.bezierCurveTo(cx-1.05*r,cy+.10*r,cx-.95*r,cy-1.0*r,cx+.05*r,cy-1.0*r);
+  ctx.bezierCurveTo(cx+.60*r,cy-1.0*r,cx+.85*r,cy-.65*r,cx+.80*r,cy-.20*r);
+  ctx.lineTo(cx+1.0*r,cy+.12*r); ctx.lineTo(cx+.82*r,cy+.20*r);
+  ctx.quadraticCurveTo(cx+.90*r,cy+.32*r,cx+.80*r,cy+.40*r);
+  ctx.quadraticCurveTo(cx+.80*r,cy+.62*r,cx+.55*r,cy+.64*r);
+  ctx.quadraticCurveTo(cx+.30*r,cy+.66*r,cx+.25*r,cy+1.0*r);
+}
+const HEADNET=(()=>{
+  const r=rng(5), p=[]; let tries=0;
+  while(p.length<30&&tries<5000){tries++;
+    const a=r()*TAU, d=Math.sqrt(r()), x=Math.cos(a)*d, y=Math.sin(a)*d;
+    if(p.every(q=>Math.hypot(q.x-x,q.y-y)>.28)) p.push({x,y});
+  }
+  const e=[];
+  p.forEach((a,i)=>p.map((b,j)=>({j,d:Math.hypot(a.x-b.x,a.y-b.y)})).filter(o=>o.j<i).sort((u,v)=>u.d-v.d).slice(0,2).forEach(o=>e.push([i,o.j])));
+  return {p,e};
+})();
+function drawHead(cx,cy,r,alpha,dens){
+  if(alpha<=.003) return;
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=FG; ctx.lineWidth=lw(); ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.fillStyle=BG; headPath(cx,cy,r); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=FG; ctx.beginPath(); ctx.arc(cx+.55*r,cy-.18*r,Math.max(1.5,r*.035),0,TAU); ctx.fill();
+  const n=Math.floor(dens*HEADNET.p.length), ox=cx-.05*r, oy=cy-.30*r, R=.52*r;
+  ctx.strokeStyle=STEEL; ctx.lineWidth=Math.max(1,U*.014);
+  for(const [i,j] of HEADNET.e){ if(i>=n) continue; const a=HEADNET.p[i],b=HEADNET.p[j];
+    ctx.globalAlpha=alpha*.8; ctx.beginPath(); ctx.moveTo(ox+a.x*R,oy+a.y*R); ctx.lineTo(ox+b.x*R,oy+b.y*R); ctx.stroke(); }
+  for(let i=0;i<n;i++){ const a=HEADNET.p[i];
+    ctx.globalAlpha=alpha; ctx.fillStyle=i===0?AMBER:FG; ctx.beginPath(); ctx.arc(ox+a.x*R,oy+a.y*R,Math.max(1.5,U*.045),0,TAU); ctx.fill(); }
+  ctx.restore();
+}
+function drawDNA(cx,cy,h,color,alpha,T){
+  if(alpha<=.003) return;
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.lineWidth=lw(); ctx.lineCap="round";
+  const w=h*.2, xs=(y,k)=>cx+Math.sin(y/h*TAU*1.2+T*1.3+k*Math.PI)*w;
+  for(let k=0;k<2;k++){ ctx.beginPath(); for(let i=0;i<=40;i++){const y=-h/2+h*i/40; i?ctx.lineTo(xs(y,k),cy+y):ctx.moveTo(xs(y,k),cy+y);} ctx.stroke(); }
+  ctx.globalAlpha=alpha*.6; ctx.lineWidth=lw(.7);
+  for(let i=1;i<8;i++){const y=-h/2+h*i/8; ctx.beginPath(); ctx.moveTo(xs(y,0),cy+y); ctx.lineTo(xs(y,1),cy+y); ctx.stroke();}
+  ctx.restore();
+}
+function drawEye(cx,cy,s,color,alpha){
+  if(alpha<=.003) return;
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw(); ctx.lineJoin="round";
+  ctx.beginPath(); ctx.moveTo(cx-s,cy); ctx.quadraticCurveTo(cx,cy-.8*s,cx+s,cy); ctx.quadraticCurveTo(cx,cy+.8*s,cx-s,cy); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,.32*s,0,TAU); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,.14*s,0,TAU); ctx.fill();
+  ctx.restore();
+}
+function drawWaves(cx,cy,s,color,alpha){
+  if(alpha<=.003) return;
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw(); ctx.lineCap="round";
+  ctx.beginPath(); ctx.arc(cx-.4*s,cy,.12*s,0,TAU); ctx.fill();
+  for(let k=1;k<=3;k++){ ctx.beginPath(); ctx.arc(cx-.4*s,cy,.3*s*k,-.75,.75); ctx.stroke(); }
+  ctx.restore();
+}
+// bilancia: restituisce i centri dei due piatti
+function drawScale(px,py,L,phi,k,baseY,alpha){
+  const ends=[[px-L*Math.cos(phi),py-L*Math.sin(phi)],[px+L*Math.cos(phi),py+L*Math.sin(phi)]];
+  const pans=ends.map(([x,y])=>({x,y:y+2.0*k}));
+  if(alpha<=.003) return pans;
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=FG; ctx.lineWidth=Math.max(1.2,k*.05); ctx.lineCap="round"; ctx.lineJoin="round";
+  ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px,baseY); ctx.moveTo(px-1.0*k,baseY); ctx.lineTo(px+1.0*k,baseY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ends[0][0],ends[0][1]); ctx.lineTo(ends[1][0],ends[1][1]); ctx.stroke();
+  pans.forEach((p,i)=>{
+    const [ex,ey]=ends[i];
+    ctx.globalAlpha=alpha*.55; ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(p.x-.8*k,p.y); ctx.moveTo(ex,ey); ctx.lineTo(p.x+.8*k,p.y); ctx.stroke();
+    ctx.globalAlpha=alpha; ctx.beginPath(); ctx.arc(p.x,p.y,.8*k,0,Math.PI); ctx.closePath(); ctx.stroke();
+  });
+  ctx.fillStyle=AMBER; ctx.beginPath(); ctx.arc(px,py,Math.max(2,k*.13),0,TAU); ctx.fill();
+  ctx.restore();
+  return pans;
+}
+
+/* ---------- tappe della linea del tempo ---------- */
+function drawPlato(cx,T,a){
+  const r=U*1.2, cy=H*.47, hx=cx-.15*U;
+  drawHead(hx,cy,r,a,0);
+  const ox=hx-.05*r, oy=cy-.32*r, pulse=1+.12*Math.sin(T*4)*seg(T,44.2,45.2);
+  glow(ox,oy,r*.75*pulse,RGB_STEEL,a*seg(T,39.5,42)*.8);
+  ctx.save(); ctx.strokeStyle=STEEL_L; ctx.lineWidth=lw(1.1); ctx.lineJoin="round";
+  const f=[seg(T,39.6,40.6),seg(T,40.2,41.2),seg(T,40.8,41.8)], s=.17*r*pulse;
+  ctx.globalAlpha=a*f[0]; ctx.beginPath(); ctx.moveTo(ox-.30*r,oy-.10*r-s); ctx.lineTo(ox-.30*r+s*1.1,oy-.10*r+s*.8); ctx.lineTo(ox-.30*r-s*1.1,oy-.10*r+s*.8); ctx.closePath(); ctx.stroke();
+  ctx.globalAlpha=a*f[1]; ctx.beginPath(); ctx.arc(ox+.22*r,oy-.16*r,s*.85,0,TAU); ctx.stroke();
+  ctx.globalAlpha=a*f[2]; ctx.strokeRect(ox-.02*r-s*.8,oy+.20*r-s*.8,s*1.6,s*1.6);
+  ctx.restore();
+}
+function drawAristotle(cx,T,a){
+  const tx=cx+.7*U, ty=H*.47, w=U*3.2, h=U*2.3;
+  ctx.save(); ctx.globalAlpha=a; ctx.strokeStyle=FG; ctx.lineWidth=lw(); ctx.lineJoin="round";
+  rrect(tx-w/2,ty-h/2,w,h,U*.12); ctx.stroke();
+  ctx.strokeStyle=MUTE; ctx.lineWidth=lw(.7); rrect(tx-w/2+U*.18,ty-h/2+U*.18,w-U*.36,h-U*.36,U*.06); ctx.stroke();
+  // i sensi scrivono
+  const sx=cx-2.35*U, ins=seg(T,57.4,58.4);
+  ctx.setLineDash([U*.1,U*.12]); ctx.lineDashOffset=-T*U*.6; ctx.strokeStyle=AMBER; ctx.lineWidth=lw(.8);
+  ctx.globalAlpha=a*ins*.8;
+  ctx.beginPath(); ctx.moveTo(sx+.6*U,H*.40); ctx.lineTo(tx-w/2-.1*U,ty-.25*U); ctx.moveTo(sx+.6*U,H*.55); ctx.lineTo(tx-w/2-.1*U,ty+.25*U); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle=FG; ctx.lineWidth=lw(.9); ctx.lineCap="round";
+  for(let i=0;i<5;i++){
+    const p=seg(T,57.8+i*.8,58.9+i*.8); if(p<=0) continue;
+    const y=ty-h/2+U*.5+i*U*.33, x0=tx-w/2+U*.42, len=(w-U*.84)*(i===4?.55:.9)*p;
+    ctx.globalAlpha=a*.85; ctx.beginPath();
+    for(let s=0;s<=len;s+=U*.04){ const yy=y+Math.sin(s/U*19+i)*U*.04+Math.sin(s/U*7)*U*.025; s?ctx.lineTo(x0+s,yy):ctx.moveTo(x0+s,yy); }
+    ctx.stroke();
+  }
+  ctx.restore();
+  drawEye(sx,H*.40,U*.42,AMBER,a*seg(T,53,54.2));
+  drawWaves(sx,H*.55,U*.45,AMBER,a*seg(T,53.6,54.8));
+}
+function leaf(x,y,ang,len,a){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.globalAlpha=a;
+  ctx.beginPath(); ctx.ellipse(len/2,0,len/2,len*.22,0,0,TAU); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(len*.85,0); ctx.stroke(); ctx.restore();
+}
+function drawRousseau(cx,T,a){
+  const by=H*.66, ph=U*.8, top=by-ph, g=seg(T,66.6,75.0), L=U*2.4*g;
+  ctx.save(); ctx.globalAlpha=a; ctx.strokeStyle=FG; ctx.lineWidth=lw(); ctx.lineJoin="round"; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(cx-.65*U,top); ctx.lineTo(cx+.65*U,top); ctx.lineTo(cx+.5*U,by); ctx.lineTo(cx-.5*U,by); ctx.closePath(); ctx.stroke();
+  // sole
+  const sx=cx+2.3*U, sy=H*.34, sa=a*seg(T,65.8,67);
+  ctx.strokeStyle=AMBER; ctx.globalAlpha=sa; ctx.beginPath(); ctx.arc(sx,sy,U*.32,0,TAU); ctx.stroke();
+  for(let i=0;i<8;i++){const q=i/8*TAU+T*.15; ctx.beginPath(); ctx.moveTo(sx+Math.cos(q)*U*.48,sy+Math.sin(q)*U*.48); ctx.lineTo(sx+Math.cos(q)*U*.66,sy+Math.sin(q)*U*.66); ctx.stroke();}
+  // seme e stelo
+  ctx.strokeStyle=FG; ctx.globalAlpha=a;
+  if(g<=.02){ ctx.fillStyle=FG; ctx.beginPath(); ctx.ellipse(cx,top-U*.08,U*.1,U*.07,0,0,TAU); ctx.fill(); }
+  const sway=Math.sin(T*1.3)*U*.05;
+  const P=s=>[cx+Math.sin(s*2.4)*U*.22*s+sway*s, top-s*L];
+  ctx.beginPath(); for(let i=0;i<=30;i++){const [x,y]=P(i/30); i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
+  [[.28,-1],[.45,1],[.62,-1],[.78,1]].forEach(([s,d],i)=>{
+    const la=seg(T,68+i*1.4,69.2+i*1.4); if(la<=0) return;
+    const [x,y]=P(s); leaf(x,y,d>0?-.5:Math.PI+.5,U*.55*la,a);
+  });
+  const fl=seg(T,74.2,75.6);
+  if(fl>0){
+    const [x,y]=P(1);
+    ctx.strokeStyle=AMBER; ctx.fillStyle=AMBER;
+    for(let i=0;i<6;i++){const q=i/6*TAU+.3; ctx.globalAlpha=a*fl; ctx.beginPath(); ctx.arc(x+Math.cos(q)*U*.2*fl,y+Math.sin(q)*U*.2*fl,U*.12*fl,0,TAU); ctx.stroke();}
+    ctx.beginPath(); ctx.arc(x,y,U*.09*fl,0,TAU); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawTests(cx,T,a){
+  const sx=cx-2.0*U, sy=H*.47, w=U*2.0, h=U*2.6;
+  ctx.save(); ctx.globalAlpha=a; ctx.strokeStyle=FG; ctx.lineWidth=lw(); ctx.lineJoin="round"; ctx.lineCap="round";
+  rrect(sx-w/2,sy-h/2,w,h,U*.1); ctx.stroke();
+  ctx.lineWidth=lw(.8);
+  ctx.beginPath(); ctx.moveTo(sx-w/2+U*.3,sy-h/2+U*.35); ctx.lineTo(sx+w/2-U*.6,sy-h/2+U*.35); ctx.stroke();
+  for(let i=0;i<4;i++){
+    const y=sy-h/2+U*.85+i*U*.45, bx=sx-w/2+U*.3;
+    ctx.strokeStyle=MUTE; ctx.strokeRect(bx,y-U*.11,U*.22,U*.22);
+    ctx.beginPath(); ctx.moveTo(bx+U*.4,y); ctx.lineTo(sx+w/2-U*.3,y); ctx.stroke();
+    const c=seg(T,80+i*.6,80.5+i*.6);
+    if(c>0){ ctx.strokeStyle=AMBER; ctx.globalAlpha=a*c; ctx.lineWidth=lw(1);
+      ctx.beginPath(); ctx.moveTo(bx-U*.02,y); ctx.lineTo(bx+U*.09,y+U*.12); ctx.lineTo(bx+U*.3,y-U*.2); ctx.stroke();
+      ctx.globalAlpha=a; ctx.lineWidth=lw(.8); }
+  }
+  // curva a campana
+  const x0=cx-.3*U, x1=cx+3.4*U, by=H*.60, ch=U*1.9, p=seg(T,81.5,83.8);
+  const f=t=>Math.exp(-Math.pow((t-.5)/.16,2)/2);
+  ctx.strokeStyle=MUTE; ctx.globalAlpha=a; ctx.beginPath(); ctx.moveTo(x0,by); ctx.lineTo(x1,by); ctx.stroke();
+  if(p>0){
+    ctx.beginPath(); ctx.moveTo(x0,by);
+    for(let i=0;i<=60*p;i++){const t=i/60; ctx.lineTo(lerp(x0,x1,t),by-f(t)*ch);}
+    ctx.lineTo(lerp(x0,x1,p),by); ctx.closePath();
+    ctx.fillStyle=STEEL_L; ctx.globalAlpha=a*.14; ctx.fill();
+    ctx.beginPath(); for(let i=0;i<=60*p;i++){const t=i/60; i?ctx.lineTo(lerp(x0,x1,t),by-f(t)*ch):ctx.moveTo(lerp(x0,x1,t),by-f(t)*ch);}
+    ctx.strokeStyle=STEEL_L; ctx.globalAlpha=a; ctx.lineWidth=lw(); ctx.stroke();
+  }
+  const m=seg(T,83.4,84.2), mx=(x0+x1)/2;
+  ctx.setLineDash([U*.08,U*.1]); ctx.strokeStyle=FG; ctx.globalAlpha=a*m*.7; ctx.lineWidth=lw(.7);
+  ctx.beginPath(); ctx.moveTo(mx,by); ctx.lineTo(mx,by-ch); ctx.stroke(); ctx.setLineDash([]);
+  ctx.restore();
+  label("100",mx,by-ch-U*.3,{size:.28,color:FG,alpha:a*m});
+  label("PUNTEGGIO QI",mx,by+U*.32,{size:.17,spacing:.06,alpha:a*m});
+  drawDNA(x1-.2*U,by-ch*.75,U*.9,STEEL_L,a*seg(T,85,86.2),T);
+}
+function drawBraid(cx,T,a){
+  const y0=H*.66, y1=H*.41, p=seg(T,93.0,96.4);
+  ctx.save(); ctx.lineWidth=lw(1.2); ctx.lineCap="round";
+  [[STEEL_L,1],[AMBER,0]].forEach(([col,k])=>{
+    ctx.strokeStyle=col; ctx.globalAlpha=a; ctx.beginPath();
+    for(let i=0;i<=80*p;i++){const s=i/80, A=lerp(1.6*U,.0,smooth(s)), x=cx+A*Math.cos(s*Math.PI*3+k*Math.PI), y=lerp(y0,y1,s); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();
+  });
+  ctx.restore();
+  label("geni",cx-1.6*U,y0+U*.4,{size:.3,font:SERIF,color:STEEL_L,alpha:a*seg(T,92.8,93.6)});
+  label("esperienza",cx+1.6*U,y0+U*.4,{size:.3,font:SERIF,color:AMBER,alpha:a*seg(T,92.8,93.6)});
+  const top=seg(T,96.0,97.0);
+  glow(cx,y1,U*.8,RGB_AMBER,a*top);
+  ctx.save(); ctx.globalAlpha=a*top; ctx.fillStyle=FG; ctx.beginPath(); ctx.arc(cx,y1,U*.11,0,TAU); ctx.fill(); ctx.restore();
+  label("costruzione",cx,y1-U*.45,{size:.42,font:SERIF,color:FG,alpha:a*top});
+}
+const STATIONS=[
+  {name:"Platone",years:"428 – 347 a.C.",tag:"INNATISMO",col:STEEL_L,tick:"IV sec. a.C.",tIn:38.5,tOut:49.5,draw:drawPlato},
+  {name:"Aristotele",years:"384 – 322 a.C.",tag:"EMPIRISMO",col:AMBER,tick:"IV sec. a.C.",tIn:52,tOut:63,draw:drawAristotle},
+  {name:"Jean-Jacques Rousseau",years:"1712 – 1778",tag:"NATURA",col:STEEL_L,tick:"1762",tIn:65.5,tOut:76.5,draw:drawRousseau},
+  {name:"I test di intelligenza",years:"Binet e Simon, 1905",tag:"INNATISMO",col:STEEL_L,tick:"1905",tIn:79,tOut:90,draw:drawTests},
+  {name:"Jean Piaget",years:"1896 – 1980",tag:"INTERAZIONE",col:FG,tick:"XX sec.",tIn:92.5,tOut:124.8,draw:drawBraid,dOut:102.8},
+];
+const TILTMINI=[[36,0],[38.5,-1],[49.5,-1],[52,1],[63,1],[65.5,-.7],[76.5,-.7],[79,-1],[90,-1],[92.5,0]];
+const TILT2=[[16,0],[17.5,-.25],[18.7,.25],[19.9,-.2],[21.0,0],[22.2,-1],[26.2,-1],[27.4,1],[31.0,1],[31.8,-.6],[32.6,.35],[33.4,-.15],[34.2,0]];
+
+/* ---------- Piaget: blocchi, schemi, stadi ---------- */
+const BLOCKJ=(()=>{const r=rng(3);return Array.from({length:6},()=>(r()-.5)*.28);})();
+function drawTower(T){
+  const a=win(T,103.0,108.4,.4,.8); if(a<=.003) return;
+  const bx=W*.54, bw=U*1.3, bh=U*.62;
+  ctx.save(); ctx.lineWidth=lw(); ctx.lineJoin="round";
+  for(let i=0;i<6;i++){
+    const tb=103.5+i*.6, p=seg(T,tb-.45,tb); if(p<=0) continue;
+    const y=H*G-(i+1)*bh, yy=lerp(y-U*2.2,y,p*p), x=bx+BLOCKJ[i]*U-bw/2, last=i===5;
+    ctx.globalAlpha=a*p; ctx.fillStyle=last?"rgba(233,180,76,.18)":BG; ctx.strokeStyle=last?AMBER:FG;
+    rrect(x,yy,bw,bh,U*.06); ctx.fill(); ctx.stroke();
+  }
+  ctx.restore();
+}
+function superEllipse(cx,cy,r,n){
+  ctx.beginPath();
+  for(let i=0;i<=72;i++){const t=i/72*TAU,c=Math.cos(t),s=Math.sin(t);
+    const x=cx+r*Math.sign(c)*Math.pow(Math.abs(c),2/n), y=cy+r*Math.sign(s)*Math.pow(Math.abs(s),2/n); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+  ctx.closePath();
+}
+function drawSchema(T){
+  const a=win(T,108.0,118.0,.6,.6); if(a<=.003) return;
+  const bx=W*.63, by=H*.47, bw=U*3.6, bh=U*2.4, hr=U*.62;
+  ctx.save(); ctx.globalAlpha=a; ctx.strokeStyle=MUTE; ctx.lineWidth=lw(); ctx.lineJoin="round";
+  rrect(bx-bw/2,by-bh/2,bw,bh,U*.15); ctx.stroke();
+  ctx.strokeStyle=FG; superEllipse(bx,by,hr,lerp(2,10,seg(T,114.6,115.8))); ctx.fillStyle="rgba(0,0,0,.35)"; ctx.fill(); ctx.stroke();
+  // la palla: assimilazione
+  const cA=win(T,108.4,113.0,.4,.4), cm=seg(T,109.0,110.6);
+  if(cA>0){
+    const x=lerp(bx+3.0*U,bx,cm), y=lerp(by-2.0*U,by,cm)-Math.sin(cm*Math.PI)*U*.5;
+    ctx.globalAlpha=a*cA; ctx.fillStyle=FG; ctx.beginPath(); ctx.arc(x,y,U*.55,0,TAU); ctx.fill();
+  }
+  // il quadrato: accomodamento
+  const sA=win(T,113.0,118.0,.4,.6), sm=seg(T,113.2,114.2), drop=seg(T,115.8,116.5), s=U*.52;
+  if(sA>0){
+    const shake=(T>114.2&&T<114.6)?Math.sin(T*70)*U*.06:0;
+    const x=lerp(bx+3.0*U,bx,sm)+shake, y=lerp(by-2.0*U,by-1.2*U,sm)+drop*1.2*U;
+    ctx.globalAlpha=a*sA; ctx.fillStyle=AMBER; rrect(x-s,y-s,2*s,2*s,U*.05); ctx.fill();
+  }
+  ctx.restore();
+  for(const [t0,t1] of [[110.6,111.6],[116.5,117.5]]){
+    const f=seg(T,t0,t1); if(f<=0||f>=1) continue;
+    ctx.save(); ctx.globalAlpha=a*(1-f); ctx.strokeStyle=AMBER; ctx.lineWidth=lw();
+    ctx.beginPath(); ctx.arc(bx,by,hr*(1+f*1.2),0,TAU); ctx.stroke(); ctx.restore();
+  }
+  label("SCHEMA",bx-bw/2+U*.25,by-bh/2+U*.3,{size:.16,spacing:.06,align:"left",alpha:a});
+  label("ASSIMILAZIONE",bx,by+bh/2+U*.4,{size:.2,spacing:.07,color:FG,alpha:a*win(T,110.6,113.0,.4,.4)});
+  label("ACCOMODAMENTO",bx,by+bh/2+U*.4,{size:.2,spacing:.07,color:AMBER,alpha:a*win(T,116.5,118.0,.4,.5)});
+}
+const STAGES=[["0–2 anni","sensomotorio"],["2–7","preoperatorio"],["7–11","operatorio concreto"],["11+","operatorio formale"]];
+function drawStairs(T){
+  const a=win(T,117.8,127.4,1,.8); if(a<=.003) return;
+  const sh=STEPH(), g=H*G;
+  ctx.save(); ctx.lineWidth=lw(); ctx.lineJoin="round";
+  STAGES.forEach(([age,name],i)=>{
+    const p=seg(T,117.9+i*.4,118.7+i*.4); if(p<=0) return;
+    const x0=W*(.42+.11*i), w=W*.11, top=g-(i+1)*sh;
+    ctx.globalAlpha=a*p; ctx.fillStyle=BG; ctx.strokeStyle=FG;
+    ctx.fillRect(x0,top,w,g-top); ctx.strokeRect(x0,top,w,g-top);
+    ctx.font=`400 ${U*.18}px ${SANS}`;
+    const lines=wrap(name,w*.9), lh=U*.24, all=[age,...lines], y0=top+(g-top)/2-(all.length-1)*lh/2;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    all.forEach((l,j)=>{ctx.fillStyle=j?FG:AMBER; ctx.fillText(l,x0+w/2,y0+j*lh);});
+  });
+  ctx.restore();
+}
+
+/* ---------- il cervello (sovrapproduzione e potatura) ---------- */
+function brainGeo(){ const rx=Math.min(W*.30,U*4.8); return {cx:W*.57,cy:H*.38,rx,ry:rx*.58}; }
+function brainOutline(T){
+  const a=win(T,127.4,166.4,.9,1.2); if(a<=.003) return;
+  const {cx,cy,rx,ry}=brainGeo(), solid=seg(T,133.4,134.4);
+  ctx.save(); ctx.lineWidth=lw(); ctx.lineJoin="round"; ctx.lineCap="round";
+  ctx.strokeStyle=solid>.5?FG:MUTE; ctx.globalAlpha=a*lerp(.9,.32,solid);
+  if(solid<.5) ctx.setLineDash([U*.14,U*.12]);
+  ctx.beginPath();
+  for(let i=0;i<=120;i++){const t=i/120*TAU, R=1+.025*Math.sin(9*t)+.018*Math.sin(14*t+1.3)+.06*Math.cos(t), s=Math.sin(t);
+    const x=cx+rx*R*Math.cos(t), y=cy+ry*R*s*(s>0?.88:1); i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+  ctx.closePath(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx-.55*rx,cy+.74*ry,.30*rx,.2*ry,0,.1,Math.PI-.1); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-.22*rx,cy+.84*ry); ctx.lineTo(cx-.18*rx,cy+1.18*ry); ctx.moveTo(cx-.06*rx,cy+.86*ry); ctx.lineTo(cx-.06*rx,cy+1.18*ry); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+.08*rx,cy-.97*ry); ctx.quadraticCurveTo(cx-.08*rx,cy-.4*ry,cx+.02*rx,cy+.05*ry); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-.45*rx,cy+.42*ry); ctx.quadraticCurveTo(cx,cy+.1*ry,cx+.5*rx,cy+.12*ry); ctx.stroke();
+  ctx.restore();
+  label("?",cx,cy-ry*.25,{size:1.3,font:SERIF,color:MUTE,alpha:a*win(T,129.6,133.4,.6,.4)});
+}
+const NET2=(()=>{
+  const r=rng(7), pts=[]; let tries=0;
+  while(pts.length<80&&tries<8000){ tries++;
+    const u=(r()*2-1)*.9, v=(r()*2-1)*.85;
+    if((u*u)/(.84*.84)+(v*v)/(.78*.78)>1) continue;
+    if(pts.every(p=>Math.hypot(p.u-u,(p.v-v)*.58)>.11)) pts.push({u,v});
+  }
+  const key=(a,b)=>a<b?a+"_"+b:b+"_"+a, seen=new Set(), edges=[];
+  pts.forEach((p,i)=>{
+    const d=pts.map((q,j)=>({j,d:Math.hypot(p.u-q.u,(p.v-q.v)*.58)})).filter(o=>o.j!==i).sort((a,b)=>a.d-b.d).slice(0,6);
+    d.forEach(o=>{const k=key(i,o.j); if(!seen.has(k)){seen.add(k);edges.push({a:i,b:o.j,use:Math.pow(r(),1.4),grow:136.3+r()*5.5,prune:143.8+r()*5.5,ph:r()});}});
+  });
+  const sorted=edges.map(e=>e.use).sort((a,b)=>b-a), thr=sorted[Math.floor(edges.length*.33)];
+  edges.forEach(e=>e.keep=e.use>=thr);
+  return {pts,edges};
+})();
+function drawNet2(T,alpha,calm){
+  if(alpha<=.003) return;
+  const {pts,edges}=NET2, {cx,cy,rx,ry}=brainGeo();
+  const X=p=>cx+p.u*rx, Y=p=>cy+p.v*ry;
+  ctx.save(); ctx.lineCap="round";
+  for(const e of edges){
+    const g=smooth((T-e.grow)/1.2); if(g<=0) continue;
+    const A=pts[e.a],B=pts[e.b];
+    let a=g, w=.012, col=STEEL;
+    if(e.keep){
+      const s=seg(T,144,151);
+      w=lerp(.012,.014+e.use*.05,s); a=lerp(g*.7,1,s);
+      col=s>.3?AMBER:STEEL;
+    } else {
+      const f=1-smooth((T-e.prune)/1.3); a=g*f*.8; w=.012*f;
+    }
+    if(a<=.01) continue;
+    ctx.globalAlpha=alpha*a*(e.keep&&T>151?.9:.6); ctx.strokeStyle=col; ctx.lineWidth=Math.max(.8,U*w);
+    ctx.beginPath(); ctx.moveTo(X(A),Y(A)); ctx.lineTo(lerp(X(A),X(B),g),lerp(Y(A),Y(B),g)); ctx.stroke();
+    if(e.keep&&T>148){                              // impulsi sulle vie rimaste
+      const q=((T*.35+e.ph)%1);
+      ctx.globalAlpha=alpha*seg(T,148,151)*.95; ctx.fillStyle=FG;
+      ctx.beginPath(); ctx.arc(lerp(X(A),X(B),q),lerp(Y(A),Y(B),q),U*.045,0,TAU); ctx.fill();
+    }
+  }
+  const nGrow=seg(T,136,138);
+  pts.forEach(p=>{
+    ctx.globalAlpha=alpha*nGrow*(calm?.8:1); ctx.fillStyle=FG;
+    ctx.beginPath(); ctx.arc(X(p),Y(p),U*.055*nGrow,0,TAU); ctx.fill();
+  });
+  ctx.restore();
+}
+
+/* ---------- copione ---------- */
+const CUES=[
+  // 1 · lo sviluppo della mente
+  {a:1.0,b:5.4,t:"Tutti siamo partiti da qui."},
+  {a:5.8,b:10.4,t:"In pochi anni, una mente impara a vedere, parlare, ragionare."},
+  {a:10.8,b:15.4,t:"Ma da dove viene tutto questo?"},
+  // 2 · geni o esperienza
+  {a:16.6,b:21.2,t:"Da più di duemila anni ci chiediamo: che cosa portiamo dalla nascita, e che cosa impariamo?"},
+  {a:21.6,b:26.2,t:"Innatismo: la conoscenza è già dentro di noi, scritta dalla natura."},
+  {a:26.6,b:31.2,t:"Empirismo: la conoscenza arriva da fuori, attraverso i sensi e l’esperienza."},
+  {a:31.6,b:35.6,t:"Facciamo un viaggio nel tempo."},
+  // 3 · il dibattito
+  {a:39.0,b:43.8,t:"Platone: le idee sono già nell’anima, prima ancora di nascere."},
+  {a:44.2,b:49.0,t:"Per lui, imparare significa ricordare."},
+  {a:52.5,b:57.3,t:"Aristotele, suo allievo, la pensa al contrario: la mente è una tavoletta ancora da scrivere."},
+  {a:57.7,b:62.6,t:"A scriverla sono i sensi, giorno dopo giorno."},
+  {a:66.0,b:70.8,t:"Rousseau: il bambino non è un adulto in miniatura."},
+  {a:71.2,b:76.0,t:"Cresce come una pianta, seguendo la propria natura."},
+  {a:79.5,b:84.3,t:"Nel 1905 Binet e Simon creano il primo test d’intelligenza."},
+  {a:84.7,b:89.6,t:"Presto il punteggio viene letto come una dote ereditaria e fissa, anche se Binet non la pensava così."},
+  // 4 · Piaget
+  {a:93.0,b:97.6,t:"Poi un biologo svizzero propose una terza via: né solo geni, né solo esperienza."},
+  {a:98.0,b:102.6,t:"Lo sviluppo è una costruzione, nata dall’incontro tra i due."},
+  {a:103.0,b:107.6,t:"Il bambino non riceve la conoscenza: la costruisce, agendo."},
+  {a:108.0,b:112.6,t:"Assimilazione: il nuovo entra negli schemi che il bambino già possiede."},
+  {a:113.0,b:117.6,t:"Accomodamento: se non ci entra, è lo schema a cambiare."},
+  {a:118.0,b:124.4,t:"Schema dopo schema, il pensiero sale per stadi: dall’azione alla logica."},
+  {a:125.0,b:128.8,t:"Piaget lo osservava nel comportamento."},
+  {a:129.2,b:132.8,t:"Non poteva guardare dentro il cervello."},
+  // 5 · il cervello
+  {a:133.4,b:136.0,t:"Oggi, sì.",fo:.5},
+  {a:136.6,b:142.0,t:"Prima il cervello produce più connessioni del necessario."},
+  {a:144.0,b:149.4,t:"Poi l’esperienza sceglie quali tenere."},
+  {a:152.0,b:157.2,t:"È la stessa idea di Piaget, vista dentro il cervello."},
+  {a:158.0,b:164.6,t:"Per capire come si costruisce il cervello, bisogna prima capire che cosa significa costruire."},
+];
+const CHAPTERS=[
+  {t:0,    a:.5,   b:15.8, n:"1 · LO SVILUPPO DELLA MENTE"},
+  {t:16,   a:16.4, b:35.6, n:"2 · GENI O ESPERIENZA"},
+  {t:36,   a:36.4, b:92.2, n:"3 · UN DIBATTITO LUNGO DUEMILA ANNI"},
+  {t:92.5, a:92.8, b:132.9,n:"4 · JEAN PIAGET"},
+  {t:133.2,a:133.5,b:165.2,n:"5 · DENTRO IL CERVELLO"},
+];
+const JUMPS=[...CHAPTERS.map(c=>c.t),165.5], END=176;
+
+/* ---------- fotogramma ---------- */
+function frame(T){
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  ctx.fillStyle=BG; ctx.fillRect(0,0,W,H);
+  const cam=track(T,CAM), sx=wx=>(wx-cam)*W+W*.58, gy=H*G;
+
+  /* terreno e linea del tempo */
+  const tl=win(T,35.8,98.5,1,1.2), ga=seg(T,.2,1.2)*(1-seg(T,165,167)*.6);
+  ctx.save(); ctx.strokeStyle=tl>.5?FG:MUTE; ctx.globalAlpha=ga*(.25+.35*tl); ctx.lineWidth=lw(.8);
+  ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); ctx.restore();
+  if(tl>0){
+    STATIONS.forEach((s,i)=>{
+      const x=sx(i*.75); if(x<-W*.2||x>W*1.2) return;
+      ctx.save(); ctx.globalAlpha=tl; ctx.strokeStyle=FG; ctx.lineWidth=lw();
+      ctx.beginPath(); ctx.moveTo(x,gy-U*.14); ctx.lineTo(x,gy+U*.14); ctx.stroke(); ctx.restore();
+      label(s.tick,x,gy+U*.42,{size:.19,spacing:.04,alpha:tl});
+    });
+    const bx=sx(1.125);                             // salto di duemila anni
+    ctx.save(); ctx.globalAlpha=tl; ctx.strokeStyle=FG; ctx.lineWidth=lw();
+    for(const d of[-.1,.1]){ctx.beginPath(); ctx.moveTo(bx+d*U-U*.1,gy+U*.2); ctx.lineTo(bx+d*U+U*.1,gy-U*.2); ctx.stroke();}
+    ctx.restore();
+    label("duemila anni dopo",bx,gy+U*.42,{size:.17,font:SERIF,alpha:tl*.8});
+  }
+
+  /* 1 · lo sviluppo della mente */
+  const f1=win(T,.8,16.2,1,1);
+  if(f1>0){
+    const heads=[[.33,.8,1.2,1.6,4.0,.3,"neonato"],[.55,1.15,6.0,6.4,9.0,.65,"bambino"],[.79,1.5,7.2,7.6,10.2,1,"adulto"]];
+    for(const [fx,rs,ta,d0,d1,dm,name] of heads){
+      const r=U*rs, ha=f1*seg(T,ta,ta+1.2), cy=H*.66-r;
+      drawHead(W*fx,cy,r,ha,dm*seg(T,d0,d1));
+      label(name.toUpperCase(),W*fx,H*.705,{size:.19,spacing:.08,alpha:ha});
+    }
+  }
+
+  /* 2 · la bilancia geni / esperienza */
+  const f2=win(T,16.2,38.6,1,.8);
+  if(f2>0){
+    const px=sx(-.75), k=U*.9;
+    const pans=drawScale(px,H*.20,U*3.0,.22*track(T,TILT2),k,gy,f2);
+    const hiL=win(T,21.8,26.6,.6,.6), hiR=win(T,26.8,31.4,.6,.6);
+    const [Lp,Rp]=pans;
+    glow(Lp.x,Lp.y-U*.75,U*1.3,RGB_STEEL,f2*hiL);
+    glow(Rp.x,Rp.y-U*.75,U*1.3,RGB_AMBER,f2*hiR);
+    drawDNA(Lp.x,Lp.y-U*.75,U*1.15,STEEL_L,f2*seg(T,16.8,17.8),T);
+    drawEye(Rp.x,Rp.y-U*.7,U*.55,AMBER,f2*seg(T,17.2,18.2));
+    label("geni",Lp.x,Lp.y+U*1.2,{size:.5,font:SERIF,color:FG,alpha:f2*seg(T,17,18)});
+    label("esperienza",Rp.x,Rp.y+U*1.2,{size:.5,font:SERIF,color:FG,alpha:f2*seg(T,17.4,18.4)});
+    label("INNATISMO",Lp.x,Lp.y+U*1.75,{size:.2,spacing:.08,color:STEEL_L,alpha:f2*seg(T,21.6,22.4)*(.4+.6*hiL)});
+    label("EMPIRISMO",Rp.x,Rp.y+U*1.75,{size:.2,spacing:.08,color:AMBER,alpha:f2*seg(T,26.6,27.4)*(.4+.6*hiR)});
+  }
+
+  /* 3 · le tappe */
+  STATIONS.forEach((s,i)=>{
+    const x=sx(i*.75); if(x<-W*.6||x>W*1.6) return;
+    const a=win(T,s.tIn-1.0,s.tOut+.8,1,1);
+    if(a<=0) return;
+    label(s.name,x,H*.135,{size:.62,font:SERIF,color:FG,alpha:a});
+    label(s.years,x,H*.198,{size:.24,spacing:.05,alpha:a});
+    chip(s.tag,x,H*.255,s.col,a);
+    s.draw(x,T,s.dOut?a*win(T,s.tIn-1,s.dOut,1,1):a);
+  });
+  const fm=win(T,37,98.5,1,1);
+  if(fm>0){
+    const px=W-U*1.7, py=U*.75, v=track(T,TILTMINI);
+    glow(px,py+U*.5,U*1.1,RGB_AMBER,fm*seg(T,92.5,94)*.7);
+    const pans=drawScale(px,py,U*.9,.3*v,U*.22,U*1.55,fm*.85);
+    label("geni",pans[0].x,pans[0].y+U*.36,{size:.17,color:STEEL_L,alpha:fm});
+    label("esperienza",pans[1].x,pans[1].y+U*.36,{size:.17,color:AMBER,alpha:fm});
+  }
+
+  /* 4 · Piaget */
+  drawTower(T); drawSchema(T); drawStairs(T);
+
+  /* 5 · il cervello */
+  brainOutline(T);
+  const f4=seg(T,135.8,137), fin=seg(T,165.0,167.0);
+  drawNet2(T,f4*(1-fin*.72),fin>0);
+
+  /* titolo finale */
+  const ft=seg(T,166.0,168.4), fs=seg(T,169.0,171.2);
+  if(ft>0){
+    const g=ctx.createRadialGradient(W/2,H*.5,0,W/2,H*.5,W*.5);
+    g.addColorStop(0,"rgba(14,15,18,.88)"); g.addColorStop(.6,"rgba(14,15,18,.55)"); g.addColorStop(1,"rgba(14,15,18,0)");
+    ctx.save(); ctx.globalAlpha=ft; ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.restore();
+    drawText("Il neurocostruttivismo",{y:.40,size:1.15,alpha:ft,color:FG,maxW:.9});
+    ctx.save(); ctx.globalAlpha=ft; ctx.strokeStyle=AMBER; ctx.lineWidth=Math.max(1.5,U*.02);
+    ctx.beginPath(); ctx.moveTo(W/2-U*.9*ft,H*.505); ctx.lineTo(W/2+U*.9*ft,H*.505); ctx.stroke(); ctx.restore();
+    drawText("Come l’attività e l’esperienza contribuiscono a costruire la mente e il cervello",
+             {y:.60,size:.42,font:SANS,alpha:fs,color:MUTE,maxW:.7});
+  }
+
+  /* il personaggino */
+  drawAvatar(T);
+
+  /* didascalie */
+  for(const c of CUES){
+    const a=win(T,c.a,c.b,.8,c.fo||.8);
+    if(a>0) drawText(c.t,{alpha:a,maxW:.78});
+  }
+
+  /* capitolo, avanzamento, pausa */
+  for(const c of CHAPTERS){
+    const a=win(T,c.a,c.b,.8,.8);
+    if(a>0) label(c.n,U*.7,U*.6,{size:.18,spacing:.1,align:"left",alpha:a*.9});
+  }
+  ctx.save(); ctx.globalAlpha=.35; ctx.fillStyle=AMBER; ctx.fillRect(0,H-2,W*clamp(T/END),2); ctx.restore();
+  if(paused) label("❚❚  PAUSA",W-U*.7,H-U*.45,{size:.17,spacing:.1,align:"right"});
+}
+
+/* ---------- ciclo ---------- */
+let T=0, last=0, playing=false, paused=false;
+const hash=new URLSearchParams(location.hash.slice(1));
+const hold=hash.has("hold");
+function tick(now){
+  if(playing){
+    const dt=Math.min(.1,(now-last)/1000); last=now;
+    if(!hold&&!paused) T=Math.min(END,T+dt);
+    frame(T);
+  }
+  requestAnimationFrame(tick);
+}
+function begin(from=0){
+  T=from; last=performance.now(); playing=true;
+  document.getElementById("start").classList.add("gone");
+}
+document.getElementById("go").addEventListener("click",()=>{
+  const el=document.documentElement;
+  try{ (el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el); }catch(e){}
+  begin(0);
+});
+window.addEventListener("keydown",e=>{
+  if(!playing) return;
+  if(e.key===" "){ paused=!paused; e.preventDefault(); }
+  else if(e.key==="ArrowRight"||e.key==="PageDown"){
+    const n=JUMPS.find(s=>s>T+.3); if(n!==undefined) T=n; e.preventDefault();
+  } else if(e.key==="ArrowLeft"||e.key==="PageUp"){
+    let cur=0; JUMPS.forEach((s,i)=>{ if(s<=T) cur=i; });
+    T=(T-JUMPS[cur]>1.5)?JUMPS[cur]:JUMPS[Math.max(0,cur-1)]; e.preventDefault();
+  }
+});
+let idleTimer;
+function wake(){document.body.classList.remove("idle");clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(playing)document.body.classList.add("idle");},1800);}
+window.addEventListener("mousemove",wake); wake();
+if(hash.has("t")){ begin(parseFloat(hash.get("t"))||0); }
+requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
