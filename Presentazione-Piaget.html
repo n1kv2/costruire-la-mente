@@ -138,7 +138,6 @@ dialog#paper[open]::backdrop{animation:dim .4s ease}
 <div class="bottom">
   <span class="count" id="count"></span>
   <div class="btns">
-    <div class="dots" id="dots"></div>
     <button class="ctl" id="prev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg><span class="lbl">Indietro</span></button>
     <button class="ctl" id="replay"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg><span class="lbl">Ripeti</span></button>
     <button class="ctl primary" id="next"><span class="lbl">Avanti</span><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
@@ -188,7 +187,7 @@ const slide=o=>SL.push(Object.assign({steps:1,apply(){}},o));
 slide({cls:'cover',html:`<img class="cover-img" src="${IMG}" alt=""><div class="copy"><p class="kicker">Jean Piaget</p><h1>Costruire<br>la <em>conoscenza</em></h1><p class="author">Nicholas Vigo</p></div>`});
 
 /* 2 · Piaget biologo */
-slide({steps:2,
+slide({gap:3600,steps:2,
 html:copy('Jean Piaget · 1896–1980','Prima di tutto,<br>un <em>biologo</em>',{chips:['malacologo','dottorato 1918','Neuchâtel']})+vis(svg(760,580,`
 <style>#orbit{transform-origin:380px 280px;animation:spin 40s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}</style>
 <path class="warm-stroke draw s0" pathLength="1" style="transition-duration:2.8s" stroke-width="4" d="${spiral(380,280,6,.19,2.75)}"/>
@@ -202,7 +201,7 @@ apply(n){on('.s0');on('.s1',n>=1)}});
  ['Bowlby','etologia',`<path class="stroke" d="M-38 22 Q-40 -2 -12 -6 Q4 -8 8 -28 Q10 -44 24 -42 Q34 -40 30 -28 L42 -26 L30 -20 Q22 -12 24 4 Q28 26 -6 30 Q-30 32 -38 22Z"/><circle cx="22" cy="-34" r="2.5" fill="var(--ink)"/><path class="stroke" d="M-70 30 Q-72 18 -60 16 Q-56 8 -50 10 Q-44 12 -48 18 Q-44 30 -58 32 Q-66 33 -70 30Z"/>`],
  ['Harlow','scimmie',`<rect x="-30" y="-26" width="60" height="64" rx="10" class="stroke"/>${[-18,-6,6,18].map(x=>`<line x1="${x}" y1="-26" x2="${x}" y2="38" class="stroke" stroke-width="1.5"/>`).join('')}${[-10,6,22].map(y=>`<line x1="-30" y1="${y}" x2="30" y2="${y}" class="stroke" stroke-width="1.5"/>`).join('')}<circle cx="0" cy="-44" r="17" class="stroke"/><circle cx="-6" cy="-46" r="2.5" fill="var(--ink)"/><circle cx="6" cy="-46" r="2.5" fill="var(--ink)"/><rect x="26" y="-8" width="12" height="22" rx="4" class="stroke"/>`],
  ['Piaget','adattamento',`<path class="warm-stroke" stroke-width="3" d="${spiral(0,-4,3,.2,2.4)}"/>`]];
-slide({steps:3,
+slide({gap:2400,steps:3,
 html:copy('Un parallelismo','Dall’animale<br>all’<em>uomo</em>',{sub:'Studiare la vita per capire la mente.'})+vis(svg(760,520,cols.map(([n,l,ic],i)=>{const x=130+i*250,last=i===2;return `<g class="rise col" data-i="${i}">
 <circle cx="${x}" cy="220" r="92" fill="${last?'var(--accent-soft)':'none'}" stroke="${last?'var(--accent)':'var(--line)'}" stroke-width="2"/>
 <g transform="translate(${x} 222) scale(1.35)">${ic}</g>
@@ -211,7 +210,7 @@ html:copy('Un parallelismo','Dall’animale<br>all’<em>uomo</em>',{sub:'Studia
 apply(n){$$('.col').forEach(g=>g.classList.toggle('on',+g.dataset.i<=n));on('.s2',n>=2)}});}
 
 /* 4 · Metodo clinico */
-slide({steps:3,
+slide({gap:2800,steps:3,
 html:copy('Parigi, 1919 · il metodo clinico','L’errore<br>è un <em>indizio</em>')+vis(svg(760,520,`
 <g class="rise s0"><text class="t-label" x="40" y="60">Risposta</text>
 <text class="t-big" id="r1" x="40" y="122">Giusta o sbagliata?</text></g>
@@ -221,15 +220,14 @@ html:copy('Parigi, 1919 · il metodo clinico','L’errore<br>è un <em>indizio</
 <text class="t-big" x="40" y="282">Quale <tspan fill="var(--accent)" font-style="italic">regola</tspan> usa?</text></g>
 <line class="green-stroke draw s2" pathLength="1" stroke-width="2" x1="42" y1="312" x2="42" y2="356"/>
 <g class="rise s2" style="transition-delay:.45s"><text class="t-label green" x="40" y="380">Nasce</text>
-<text x="40" y="448" font-family="Georgia,serif" font-size="62" font-style="italic" fill="var(--accent)" letter-spacing="-1">epistemologia genetica</text>
-<rect x="40" y="474" width="120" height="5" rx="2.5" fill="var(--warm)"/></g>`)),
+<text class="t-big" x="40" y="442" font-style="italic" fill="var(--accent)" style="fill:var(--accent)">epistemologia genetica</text></g>`)),
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);$('#r1').classList.toggle('dim',n>=1)}});
 
 /* 5 · Laland & Seed */
 {const L=['Memoria','Linguaggio','Pianificazione','Cooperazione','Apprendimento'];
  const P=L.map((_,i)=>{const a=(-90+i*72)*Math.PI/180;return [380+190*Math.cos(a),285+190*Math.sin(a)]});
  const E=[];for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)E.push([i,j]);
-slide({steps:2,
+slide({gap:3200,steps:2,
 html:copy('Perché studiare l’intelligenza?','Non una capacità,<br>ma la loro <em>integrazione</em>',{cites:['laland']})+vis(svg(760,580,`
 <style>.nd5{fill:var(--paper);stroke:#b9b1a5;stroke-width:2.5;transition:fill .8s,stroke .8s}.int .nd5{fill:var(--accent);stroke:var(--accent)}</style>
 <g id="net5">${E.map(([a,b],k)=>`<path class="green-stroke draw s1" pathLength="1" stroke-width="2" style="transition-delay:${k*80}ms" d="M${P[a]} L${P[b]}"/>`).join('')}
@@ -240,7 +238,7 @@ apply(n,inst){on('.s0');on('.s1',n>=1);$('#net5').classList.toggle('int',n>=1);
 
 /* 6 · Il focolare */
 {const person=(x,flip)=>`<g transform="translate(${x} 0) scale(${flip?-1:1} 1)"><circle cx="0" cy="318" r="24" fill="var(--ink)"/><path d="M-46 448 Q-46 360 0 356 Q38 358 44 410 L44 448Z" fill="var(--ink)"/></g>`;
-slide({steps:3,
+slide({gap:3200,steps:3,
 html:copy('L’origine del linguaggio · un’ipotesi','Intorno<br>al <em>fuoco</em>',{cites:['fire']})+vis(svg(760,560,`
 <defs><radialGradient id="glow"><stop offset="0" stop-color="#e9a457" stop-opacity=".55"/><stop offset="1" stop-color="#e9a457" stop-opacity="0"/></radialGradient></defs>
 <style>#glowC{animation:breathe 2.6s ease-in-out infinite;transform-origin:380px 400px}@keyframes breathe{50%{transform:scale(.9);opacity:.8}}.flame{transform-origin:380px 440px;animation:flick 1.3s ease-in-out infinite}.flame.f2{animation-duration:.9s;animation-delay:-.3s}@keyframes flick{50%{transform:scale(.93,1.07) skewX(2deg)}}.wave{opacity:0}.on .wave{animation:wv 2.4s ease-out infinite}.on .wave:nth-child(2){animation-delay:.6s}.on .wave:nth-child(3){animation-delay:1.2s}@keyframes wv{0%{opacity:0;transform:translateX(-8px)}30%{opacity:.9}100%{opacity:0;transform:translateX(22px)}}</style>
@@ -259,7 +257,7 @@ ${person(170,false)}${person(590,true)}
 apply(n,inst){on('.s0');on('.s1',n>=1);on('.s2',n>=2);const c=['','',['raccontare ciò che non è presente','t-cap mid green']][n];if(c){if(inst)setText('#fireCap',...c);else later(()=>setText('#fireCap',...c),700)}else setText('#fireCap','')}});}
 
 /* 7 · Cultura cumulativa */
-slide({steps:4,
+slide({gap:2000,steps:4,
 html:copy('Il vantaggio umano','Non si riparte<br>da <em>zero</em>',{sub:'Memoria, linguaggio, cultura cumulativa.',cites:['stout','legare']})+vis(svg(760,560,`
 ${[0,1,2,3].map(g=>`<g class="rise gen" data-i="${g}">${Array.from({length:g+1},(_,j)=>`<rect x="${90+g*160}" y="${420-j*62}" width="100" height="54" rx="6" fill="${j===g?'var(--accent)':'var(--accent-soft)'}" stroke="var(--accent)" stroke-width="1.5"/>`).join('')}<text class="t-label mid" x="${140+g*160}" y="510">${g+1}ª gen.</text></g>`).join('')}
 <line x1="60" y1="482" x2="720" y2="482" class="hair"/>
@@ -268,7 +266,7 @@ ${[0,1,2,3].map(g=>`<g class="rise gen" data-i="${g}">${Array.from({length:g+1},
 apply(n){$$('.gen').forEach(g=>g.classList.toggle('on',+g.dataset.i<=n));on('.s3',n>=3)}});
 
 /* 8 · Vie dorsale e ventrale */
-slide({steps:3,
+slide({gap:3000,steps:3,
 html:copy('Stout & Hecht · il cervello che impara','Vedere <em>cosa</em>,<br>sapere <em>come</em>',{cites:['stout']})+vis(svg(760,600,`
 <g transform="translate(-30 22) scale(1.55)"><path class="stroke draw s0" pathLength="1" stroke-width="1.7" style="transition-duration:2s" d="${BRAIN}"/><path class="hair fade s0" stroke-width="1" style="transition-delay:1.2s" d="${SULCI}"/>
 <circle class="fade s0" style="transition-delay:1.6s" cx="452" cy="200" r="10" fill="var(--ink)"/>
@@ -284,7 +282,7 @@ apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});
 /* 9 · Curriculum a elica */
 {let d='';const pt=t=>[380+210*Math.cos(t),470-16*t-46*Math.sin(t)];for(let t=0;t<=6*Math.PI+.01;t+=.06){const[x,y]=pt(t);d+=(d?' L':'M')+x.toFixed(1)+' '+y.toFixed(1)}
  const lab=[[0,'osservare','start',24],[Math.PI,'praticare','end',-24],[2*Math.PI,'interagire','start',24]];
-slide({steps:2,
+slide({gap:4000,steps:2,
 html:copy('Stout & Hecht · curriculum a elica','Imparare<br><em>a spirale</em>',{cites:['stout']})+vis(svg(760,580,`
 <path class="green-stroke draw s0" pathLength="1" stroke-width="4" style="transition-duration:3s" d="${d}"/>
 ${lab.map(([t,l,a,dx],i)=>{const[x,y]=pt(t);return `<g class="fade s0" style="transition-delay:${.5+i*.6}s"><circle cx="${x}" cy="${y}" r="9" fill="var(--accent)"/><text class="t-serif" font-size="28" text-anchor="${a}" x="${x+dx}" y="${y+10}">${l}</text></g>`}).join('')}
@@ -295,7 +293,7 @@ apply(n){on('.s0');on('.s1',n>=1)}});}
 /* 10 · Filogenesi e ontogenesi */
 {const branches=[['M200 470 L200 370',0],['M200 370 Q160 320 110 290',1],['M200 370 Q240 310 300 280',1],['M110 290 Q80 240 60 190',2],['M110 290 Q130 230 140 170',2],['M300 280 Q290 220 260 160',2],['M300 280 Q340 230 350 180',2],['M260 160 Q240 120 225 90',3],['M260 160 Q290 110 310 80',3]];
  const tips=[[60,190],[140,170],[350,180],[225,90],[310,80]];
-slide({steps:3,
+slide({gap:[3000,3400],steps:3,
 html:copy('Ritorno a Piaget','La specie<br>e <em>l’individuo</em>',{sub:'Linguaggio e cultura ampliano l’adattamento.'})+vis(svg(760,600,`
 ${branches.map(([d,lv])=>`<path class="green-stroke draw s0" pathLength="1" style="transition-duration:.9s;transition-delay:${lv*.45}s" d="${d}"/>`).join('')}
 ${tips.map(([x,y])=>`<circle class="fade s0" style="transition-delay:1.7s" cx="${x}" cy="${y}" r="7" fill="var(--accent)"/>`).join('')}
@@ -310,7 +308,7 @@ ${tips.map(([x,y])=>`<circle class="fade s0" style="transition-delay:1.7s" cx="$
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});}
 
 /* 11 · Costruttivismo */
-slide({steps:3,
+slide({gap:2800,steps:3,
 html:copy('Il costruttivismo','Conoscere<br>è <em>costruire</em>',{sub:'Né solo geni, né solo esperienza.'})+vis(svg(760,580,`
 <style>.ring{fill:transparent;stroke:var(--ink);stroke-width:2;transition:stroke-dashoffset 1.6s var(--ease),fill 1.2s ease}.ring.tint{fill:var(--accent-soft);stroke:var(--accent)}</style>
 <circle class="ring draw s0" pathLength="1" cx="230" cy="290" r="128"/>
@@ -328,7 +326,7 @@ apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);$$('.ring').forEach(r=>r.classL
 /* 12 · Assimilazione e accomodamento */
 {const pos=['translate(0px,0px)','translate(-188px,0px)','translate(-60px,0px) rotate(90deg)','translate(-400px,0px) rotate(90deg)'];
  const lab=[['Assimilazione','t-serif mid'],['Non passa…','t-serif mid warm'],['Accomodamento','t-serif mid green'],['Adattamento','t-serif mid green']];
-slide({steps:4,
+slide({gap:2600,steps:4,
 html:copy('Come cambiano gli schemi','Assimilare<br>e <em>accomodare</em>',{chips:['schema','adattamento']})+vis(svg(760,560,`
 <style>#stick{transform-box:fill-box;transform-origin:center;transition:transform 1s var(--ease)}#stick.bump{animation:bump .5s .85s}@keyframes bump{30%{translate:9px 0}60%{translate:-3px 0}}</style>
 ${Array.from({length:8},(_,i)=>`<circle cx="380" cy="${70+i*54}" r="9" fill="var(--ink)"/>`).join('')}
@@ -339,7 +337,7 @@ apply(n,instant){const st=$('#stick');st.style.transform=pos[n];st.classList.tog
 
 /* 13 · Equilibrazione */
 {const lab=[['Equilibrio','t-cap mid'],['Disequilibrio','t-cap mid warm'],['Nuovo equilibrio','t-cap mid green']];
-slide({steps:3,
+slide({gap:3000,steps:3,
 html:copy('Il motore del cambiamento','L’<em>equilibrazione</em>',{chips:['conflitto cognitivo','autoregolazione']})+vis(svg(760,580,`
 <style>#beam{transform-origin:380px 400px;transition:transform 1.2s var(--spring)}.blk{transition:transform .7s cubic-bezier(.5,0,.75,0),opacity .3s}.blk:not(.on){transform:translateY(-320px);opacity:0}</style>
 <line x1="80" y1="470" x2="680" y2="470" class="hair"/>
@@ -357,7 +355,7 @@ apply(n,instant){const beam=$('#beam'),tilt=n===1?'rotate(9deg)':'rotate(0deg)';
 
 /* 14 · Gli stadi */
 {const st=[['0–2 anni','Sensomotorio','','agire'],['2–7 anni','Preoperatorio','','rappresentare'],['7–11 anni','Operatorio','concreto','coordinare'],['11+ anni','Operatorio','formale','ipotizzare']];
-slide({steps:4,
+slide({gap:1800,steps:4,
 html:copy('La teoria stadiale','Quattro<br><em>stadi</em>',{sub:'Sequenza invariante: ogni stadio integra il precedente.'})+vis(svg(760,560,st.map(([age,a,b,verb],i)=>{const x=6+i*188,top=380-i*100;return `<g class="rise st" data-i="${i}">
 <rect x="${x}" y="${top}" width="180" height="${540-top}" fill="var(--accent-soft)"/>
 <line x1="${x}" y1="${top}" x2="${x+180}" y2="${top}" stroke="var(--accent)" stroke-width="4"/>
@@ -370,7 +368,7 @@ apply(n){$$('.fit').forEach(e=>{if(e.getComputedTextLength()>158)e.setAttribute(
 {const caps=[['Nascosto in A','t-cap mid'],['Spostato in B','t-cap mid'],['…ma lo cerca in A','t-cap mid warm'],['Contano memoria e inibizione','t-cap mid green']];
  const cup=(id,x,l)=>`<g transform="translate(${x} 0)"><g class="cup" id="${id}"><path d="M-82 400 L-68 276 Q0 234 68 276 L82 400Z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/></g><text class="t-serif mid" x="0" y="456" style="fill:var(--muted)">${l}</text></g>`;
  const up=(id,b)=>$('#'+id).classList.toggle('up',b);
-slide({steps:4,
+slide({gap:[3000,3600,2800],steps:4,
 html:copy('Stadio 1 · 0–2 anni','Il periodo<br><em>sensomotorio</em>',{chips:['schema d’azione','permanenza dell’oggetto','errore A non B']})+vis(svg(760,540,`
 <style>.cup{transition:transform .75s var(--ease)}.cup.up{transform:translateY(-150px)}#ball{transition:transform 1s var(--ease)}#ball.b{transform:translateX(300px)}</style>
 <line x1="60" y1="400" x2="700" y2="400" class="hair"/>
@@ -387,7 +385,7 @@ apply(n,instant){on('.s2',n>=2);const ball=$('#ball');
   if(n===3){up('cupB',true);later(()=>setText('#objCap',...caps[3]),600)}}});}
 
 /* 16 · Preoperatorio: funzione simbolica */
-slide({steps:2,
+slide({gap:2800,steps:2,
 html:copy('Stadio 2 · 2–7 anni','Il periodo<br><em>preoperatorio</em>',{chips:['funzione simbolica','gioco simbolico','irreversibilità']})+vis(svg(760,480,`
 <style>#wood{transition:opacity 1s ease}#wood.ghost{opacity:.12}#plane{opacity:0;transform:translateY(20px) rotate(4deg);transform-origin:380px 220px;transition:opacity 1s ease,transform 1.4s var(--ease)}#plane.on{opacity:1;transform:translateY(-14px) rotate(-6deg)}#plane.on>g{animation:float 3.5s ease-in-out 1.4s infinite}@keyframes float{50%{transform:translateY(-10px)}}</style>
 <g id="wood"><rect x="170" y="206" width="420" height="48" rx="9" fill="#c99b6c"/><path d="M200 222 Q330 214 450 224 T570 220 M215 238 Q340 246 470 236 T560 240" stroke="#a87b4f" stroke-width="2" fill="none"/></g>
@@ -399,7 +397,7 @@ apply(n){$('#wood').classList.toggle('ghost',n>=1);$('#plane').classList.toggle(
 {const AREA=136*118;let p=0;
  function draw(v){p=v;const w=140-72*v,h=AREA/(w-4),x=550-w/2;const wr=$('#wr'),gr=$('#gr2');if(!wr)return;wr.setAttribute('x',x+2);wr.setAttribute('width',w-4);wr.setAttribute('y',418-h);wr.setAttribute('height',h);gr.setAttribute('d',`M${x} ${418-h-60} L${x} 420 L${x+w} 420 L${x+w} ${418-h-60}`)}
  function tween(to){const from=p;let t0;const f=t=>{if(!$('#wr'))return;t0??=t;const k=Math.min(1,(t-t0)/1600),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;draw(from+(to-from)*e);if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
-slide({steps:3,
+slide({gap:[2800,3200],steps:3,
 html:copy('Stadio 3 · 7–11 anni','Il periodo<br><em>operatorio concreto</em>',{chips:['conservazione','reversibilità','classificazione']})+vis(svg(760,520,`
 <line x1="60" y1="421" x2="700" y2="421" class="hair"/>
 <rect x="142" y="300" width="136" height="118" fill="var(--blue)" opacity=".5"/>
@@ -419,7 +417,7 @@ apply(n,instant){if(instant)draw(n>=1?1:0);else if(n===1)tween(1);else draw(n>=1
 
 /* 18 · Operatorio formale: i dadi */
 {let cells='';for(let a=1;a<=6;a++)for(let b=1;b<=6;b++)cells+=`<div class="dc" data-s="${a+b}" style="transition-delay:${(a-1+b-1)*40}ms">${a}+${b}</div>`;
-slide({steps:3,
+slide({gap:2800,steps:3,
 html:copy('Stadio 4 · dagli 11 anni','Il periodo<br><em>operatorio formale</em>',{chips:['ipotetico-deduttivo','il possibile','gruppo INRC']})+vis(`
 <style>.dwrap{display:flex;flex-direction:column;align-items:flex-start;gap:30px}.dq{font-family:var(--serif);font-style:italic;font-size:32px}.dice{display:flex;align-items:center;gap:56px}.dgrid{display:grid;grid-template-columns:repeat(6,62px);gap:7px}.dc{height:62px;border:1px solid var(--line);border-radius:8px;display:grid;place-items:center;font-size:15px;color:var(--muted);transition:background .5s,color .5s,border-color .5s}.dc.two{background:var(--warm);border-color:var(--warm);color:#fff}.dc.seven{background:var(--accent);border-color:var(--accent);color:#fff}.res{display:flex;flex-direction:column;gap:46px}.res div{opacity:0;transform:translateY(16px);transition:opacity .8s var(--ease),transform 1s var(--ease)}.res div.on{opacity:1;transform:none}.res span{display:block;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}.res b{font-family:var(--serif);font-weight:400;font-size:64px}</style>
 <div class="dwrap"><p class="dq">Due dadi: esce più spesso 2 o 7?</p><div class="dice"><div class="dgrid">${cells}</div><div class="res"><div id="r2"><span>somma 2</span><b style="color:var(--warm)">1/36</b></div><div id="r7"><span>somma 7</span><b style="color:var(--accent)">6/36</b></div></div></div></div>`),
@@ -427,7 +425,7 @@ apply(n){$$('.dc').forEach(c=>{c.classList.toggle('two',n>=1&&c.dataset.s==='2')
 
 /* 19 · Limiti: décalage */
 {const rows=[['Quantità',150,330],['Peso',290,520],['Volume',420,680]];
-slide({steps:3,
+slide({gap:2000,steps:3,
 html:copy('I limiti · 1','Non tutto<br><em>insieme</em>',{chips:['asincronie','décalage orizzontali'],cites:['newcombe']})+vis(svg(760,460,`
 <style>.bar{transform-box:fill-box;transform-origin:left center;transform:scaleX(0);transition:transform 1.1s var(--ease)}.bar.on{transform:scaleX(1)}</style>
 ${Array.from({length:7},(_,i)=>`<line x1="${150+i*90}" y1="40" x2="${150+i*90}" y2="350" class="hair" stroke-dasharray="2 6"/>`).join('')}
@@ -440,7 +438,7 @@ apply(n){$$('.bar').forEach(e=>e.classList.toggle('on',+e.dataset.i<=n));on('.s2
 
 /* 20 · Limiti: struttura unica */
 {const D=[['linguaggio',220,170],['numero',540,170],['spazio',220,370],['oggetti',540,370]];
-slide({steps:2,
+slide({gap:3000,steps:2,
 html:copy('I limiti · 2','Una mente,<br><em>tante strutture</em>',{chips:['struttura unitaria','dominio-generale','analogie col comportamentismo']})+vis(svg(760,540,`
 <style>#one{transform-origin:380px 270px;transition:transform 1s var(--ease),opacity .8s}#one.split{transform:scale(.4);opacity:0}.dom{transition:transform 1.1s var(--spring),opacity .7s}.dom:not(.on){opacity:0}</style>
 <g id="one"><circle cx="380" cy="270" r="150" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text class="t-serif mid" x="380" y="262" font-size="30">una struttura</text><text class="t-serif mid" x="380" y="300" font-size="30">unica</text></g>
@@ -451,7 +449,7 @@ apply(n,inst){$('#one').classList.toggle('split',n>=1);$$('.dom').forEach(g=>{g.
 
 /* 21 · Crone & Ridderinkhof */
 {const caps=[['Corteccia prefrontale','pianificazione · inibizione · memoria di lavoro'],['Ippocampo','memoria episodica e spaziale'],['Reti del linguaggio','Broca · Wernicke']];
-slide({steps:3,
+slide({gap:[3200,3000],steps:3,
 html:copy('Le neuroscienze dello sviluppo','Dalla teoria<br>al <em>cervello</em>',{cites:['crone']})+vis(svg(760,620,`
 <style>.reg{fill:var(--accent);opacity:0;transition:opacity .9s}.reg.on{opacity:.22}.reg.cur{opacity:.55}</style>
 <g transform="translate(-30 22) scale(1.55)">
@@ -468,7 +466,7 @@ apply(n,inst){on('.s0');on('.s2',n>=2);$$('.reg').forEach(r=>{const i=+r.dataset
 /* 22 · Plasticità */
 {const P=[[95,200],[180,95],[205,320],[300,165],[345,305],[435,80],[495,230],[395,200]].map(([x,y])=>[x*1.25+5,y*1.25+20]);
  const E=[[0,1],[0,2],[0,3],[1,3],[1,5],[2,3],[2,4],[3,4],[3,5],[3,7],[4,6],[4,7],[5,6],[5,7],[6,7]],strong=new Set([1,4,6,9,10,13]);
-slide({steps:2,
+slide({gap:3000,steps:2,
 html:copy('Neurocostruttivismo','L’esperienza<br><em>riorganizza</em>',{sub:'Le connessioni cambiano con l’uso.'})+vis(svg(760,540,`
 <style>.ed{fill:none;stroke:#b9b1a5;stroke-width:2;transition:stroke-dashoffset 1s var(--ease),stroke .9s,stroke-width .9s,opacity .9s}.net.re .ed.w{opacity:.15}.net.re .ed.s{stroke:var(--accent);stroke-width:6}.sig{fill:none;stroke:var(--warm);stroke-width:3;stroke-dasharray:6 22;opacity:0;transition:opacity .8s}.net.re .sig{opacity:.9;animation:sig 1.6s linear infinite}@keyframes sig{to{stroke-dashoffset:-56}}.nd{fill:var(--paper);stroke:var(--ink);stroke-width:2.5;transition:fill .8s}.net.re .nd{fill:var(--accent-soft)}</style>
 <g class="net" id="net">
@@ -480,7 +478,7 @@ ${P.map(([x,y],i)=>`<circle class="nd fade s0" style="transition-delay:${200+i*6
 apply(n){on('.s0');on('.s1',n>=1);$('#net').classList.toggle('re',n>=1);setText('#plCap',n?'plasticità':'')}});}
 
 /* 23 · Chiusura */
-slide({steps:4,cls:'final',
+slide({gap:1600,steps:4,cls:'final',
 html:`<div class="copy"><p class="kicker">In sintesi</p><h2>Come si costruisce<br>la <em>conoscenza?</em></h2><div class="levels">${[['evoluzione','Specie'],['Piaget','Individuo'],['neuroscienze','Cervello']].map(([a,b],i)=>`<div class="lvl" data-i="${i}"><span>${a}</span><b>${b}</b></div>`).join('')}</div></div>`,
 apply(n){$$('.lvl').forEach(l=>l.classList.toggle('on',+l.dataset.i<n))}});
 
@@ -502,7 +500,7 @@ function render(i,atEnd=false){
   stage.innerHTML=`<section class="slide ${s.cls||''}">${s.html}</section>`;
   const el=stage.firstElementChild;
   if(atEnd){el.classList.add('instant');s.apply(step,true);void el.offsetWidth;el.classList.remove('instant')}
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add('in');if(!atEnd)s.apply(0,false)}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add('in');if(atEnd)return;s.apply(0,false);let at=400;for(let k=1;k<s.steps;k++){const g=Array.isArray(s.gap)?s.gap[k-1]:(s.gap||2800);at+=g;later(()=>{step=k;s.apply(k,false)},at)}}));
   ui();
 }
 function go(i,atEnd=false){
@@ -511,14 +509,13 @@ function go(i,atEnd=false){
   if(el)el.classList.add('out');
   setTimeout(()=>{busy=false;render(i,atEnd);try{history.replaceState(null,'','#'+(i+1))}catch(e){}},el?260:0);
 }
-function next(){if(busy)return;const s=SL[cur];if(step<s.steps-1){step++;s.apply(step,false);ui()}else go(cur+1)}
+function next(){if(!busy)go(cur+1)}
 function prev(){go(cur-1,true)}
 function replay(){if(!busy&&SL[cur].steps>1)render(cur)}
 function ui(){
   const s=SL[cur],last=SL.length-1;
-  prevB.disabled=cur===0;nextB.disabled=cur===last&&step===s.steps-1;restartB.disabled=cur===0;
+  prevB.disabled=cur===0;nextB.disabled=cur===last;restartB.disabled=cur===0;
   replayB.classList.toggle('gone',s.steps<2);
-  byId('dots').innerHTML=s.steps>1?Array.from({length:s.steps},(_,k)=>`<i class="${k<=step?'on':''}"></i>`).join(''):'';
   byId('count').textContent=String(cur+1).padStart(2,'0')+' / '+SL.length;
   byId('progress').style.width=((cur+1)/SL.length*100)+'%';
 }
