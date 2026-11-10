@@ -213,13 +213,16 @@ apply(n){$$('.col').forEach(g=>g.classList.toggle('on',+g.dataset.i<=n));on('.s2
 /* 4 · Metodo clinico */
 slide({steps:3,
 html:copy('Parigi, 1919 · il metodo clinico','L’errore<br>è un <em>indizio</em>')+vis(svg(760,520,`
-<g class="rise s0"><text class="t-label" x="40" y="100">Risposta</text>
-<text class="t-big" id="r1" x="40" y="170">Giusta o sbagliata?</text></g>
-<line class="warm-stroke draw s1" pathLength="1" x1="32" y1="153" x2="475" y2="153"/>
-<g class="rise s1" style="transition-delay:.45s"><line x1="42" y1="215" x2="42" y2="285" class="green-stroke" stroke-width="2"/>
-<text class="t-label green" x="40" y="330">Ragionamento</text>
-<text class="t-big" x="40" y="400">Quale <tspan fill="var(--accent)" font-style="italic">regola</tspan> usa?</text></g>
-<g class="rise s2"><line x1="42" y1="425" x2="42" y2="455" class="green-stroke" stroke-width="2"/><text class="t-cap green" x="40" y="500" font-size="36">epistemologia genetica</text></g>`)),
+<g class="rise s0"><text class="t-label" x="40" y="60">Risposta</text>
+<text class="t-big" id="r1" x="40" y="122">Giusta o sbagliata?</text></g>
+<line class="warm-stroke draw s1" pathLength="1" x1="32" y1="105" x2="475" y2="105"/>
+<line class="green-stroke draw s1" pathLength="1" stroke-width="2" x1="42" y1="152" x2="42" y2="196"/>
+<g class="rise s1" style="transition-delay:.45s"><text class="t-label green" x="40" y="220">Ragionamento</text>
+<text class="t-big" x="40" y="282">Quale <tspan fill="var(--accent)" font-style="italic">regola</tspan> usa?</text></g>
+<line class="green-stroke draw s2" pathLength="1" stroke-width="2" x1="42" y1="312" x2="42" y2="356"/>
+<g class="rise s2" style="transition-delay:.45s"><text class="t-label green" x="40" y="380">Nasce</text>
+<text x="40" y="448" font-family="Georgia,serif" font-size="62" font-style="italic" fill="var(--accent)" letter-spacing="-1">epistemologia genetica</text>
+<rect x="40" y="474" width="120" height="5" rx="2.5" fill="var(--warm)"/></g>`)),
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);$('#r1').classList.toggle('dim',n>=1)}});
 
 /* 5 · Laland & Seed */
