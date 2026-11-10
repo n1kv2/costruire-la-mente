@@ -16,9 +16,9 @@ a{color:var(--accent)}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* Intestazione */
-header{padding:44px 0 26px}
+header{padding:46px 0 30px}
 .kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
-h1{font-family:var(--serif);font-weight:400;font-size:44px;line-height:1.04;letter-spacing:-.02em;margin-top:16px}
+h1{font-family:var(--serif);font-weight:400;font-size:46px;line-height:1.04;letter-spacing:-.02em}
 h1 em{color:var(--accent)}
 .intro{color:var(--muted);font-size:16px;margin-top:16px}
 .index{display:flex;gap:8px;overflow-x:auto;padding:18px 22px 4px;margin:0 -22px;scrollbar-width:none}
@@ -36,11 +36,18 @@ h2{font-family:var(--serif);font-weight:400;font-size:27px;line-height:1.18;marg
 .lab{display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px}
 .lab::before{content:'';width:22px;height:1px;background:currentColor}
 .abs p{font-size:16.5px;line-height:1.62}
-.abs .it{display:none}
-body.it .abs .en{display:none}
-body.it .abs .it{display:block}
-.abs p{animation:none}
-body.swap .abs p{animation:swap .45s var(--ease)}
+.abs .txt{font-size:16.5px;line-height:1.62;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:9;overflow:hidden}
+.abs.open .txt{display:block;-webkit-line-clamp:unset}
+.abs .txt p+p{margin-top:12px}
+.more{display:none;margin-top:12px;font-size:14px;color:var(--accent);border:1px solid rgba(47,93,72,.45);border-radius:999px;padding:8px 16px;background:rgba(223,228,214,.45)}
+.abs.long .more{display:inline-flex;align-items:center;gap:8px}
+.more svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .3s}
+.abs.open .more svg{transform:rotate(180deg)}
+.sk{height:14px;border-radius:7px;background:linear-gradient(90deg,#e6dfd4 0%,#f3eee7 50%,#e6dfd4 100%);background-size:200% 100%;animation:sh 1.3s linear infinite;margin:10px 0}
+.sk:nth-child(3){width:70%}
+@keyframes sh{to{background-position:-200% 0}}
+.miss{font-size:15px;color:var(--muted)}
+.abs.swap .txt{animation:swap .45s var(--ease)}
 @keyframes swap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .note{font-size:12px;color:var(--muted);margin-top:8px}
 .piaget{margin-top:22px;background:var(--accent-soft);border-radius:18px;padding:18px 18px 18px}
@@ -86,16 +93,9 @@ svg *{animation-play-state:paused!important}
 </head>
 <body>
 <div class="wrap">
-<header>
-  <p class="kicker">Costruire la conoscenza · Jean Piaget</p>
-  <h1>Gli <em>articoli</em></h1>
-  <p class="intro">Sei letture citate nella presentazione. Per ognuna: la rivista, una sintesi dell’abstract e il legame con Piaget.</p>
-  <nav class="index" aria-label="Indice">
-    <a href="#laland">Laland & Seed</a><a href="#fire">Hobaiter & Dominy</a><a href="#stout">Stout & Hecht</a><a href="#legare">Legare</a><a href="#newcombe">Newcombe</a><a href="#crone">Crone & Ridderinkhof</a>
-  </nav>
-</header>
+<header><h1>Gli <em>articoli</em></h1></header>
 <main id="list"></main>
-<footer>Presentazione di Nicholas Vigo · <a href="./Presentazione-Piaget.html">apri le slide</a><br>Le sintesi riassumono gli abstract originali, consultabili dal link DOI di ogni articolo.</footer>
+
 </div>
 <button class="tr" id="tr" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 5h9M8.5 3v2M6 5c.5 3 2.5 5.5 5 7M11 5c-.6 3.6-3 6.6-6.5 8.5"/><path d="M12.5 21l4-10 4 10M14 17.5h5"/></svg><span id="trL">Traduci in italiano</span></button>
 
@@ -119,60 +119,73 @@ fire:`<svg viewBox="0 0 400 240"><defs><radialGradient id="g"><stop offset="0" s
 <g class="pop" style="animation-delay:.6s"><rect x="40" y="28" width="96" height="32" rx="16" fill="none" stroke="var(--accent)" stroke-width="1.5"/><text class="t-s" font-style="italic" font-size="15" x="88" y="49" text-anchor="middle" fill="var(--accent)" style="fill:var(--accent)">passato</text>
 <rect x="264" y="28" width="96" height="32" rx="16" fill="none" stroke="var(--accent)" stroke-width="1.5"/><text class="t-s" font-style="italic" font-size="15" x="312" y="49" text-anchor="middle" style="fill:var(--accent)">futuro</text>
 <path d="M136 44 Q200 6 264 44" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="3 6"/></g></svg>`,
-stout:`<svg viewBox="0 0 400 250"><g transform="translate(-2 10) scale(.86)"><path d="${BRAIN}" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="452" cy="200" r="7" fill="var(--ink)"/>
+stout:`<svg viewBox="0 0 400 300"><g transform="translate(-36 6) scale(.86)"><path d="${BRAIN}" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="452" cy="200" r="7" fill="var(--ink)"/>
 <path class="dr" pathLength="1" d="M445 214 C410 268 330 290 245 262" fill="none" stroke="var(--warm)" stroke-width="5" stroke-linecap="round"/>
 <path class="dr" pathLength="1" style="animation-delay:1.2s" d="M447 188 C436 120 370 92 290 108" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/></g>
-<text class="t-s pop" font-size="15" x="230" y="34" text-anchor="middle" style="fill:var(--accent);animation-delay:1.4s">via dorsale · <tspan font-style="italic">come</tspan></text>
-<text class="t-s pop" font-size="15" x="200" y="238" text-anchor="middle" style="fill:var(--warm);animation-delay:.3s">via ventrale · <tspan font-style="italic">cosa</tspan></text></svg>`,
+<text class="t-s pop" font-size="15" x="200" y="30" text-anchor="middle" style="fill:var(--accent);animation-delay:1.4s">via dorsale · <tspan font-style="italic">come</tspan></text>
+<text class="t-s pop" font-size="15" x="200" y="288" text-anchor="middle" style="fill:var(--warm);animation-delay:.3s">via ventrale · <tspan font-style="italic">cosa</tspan></text></svg>`,
 legare:`<svg viewBox="0 0 400 230">${[0,1,2,3].map(g=>`<g class="gen" style="animation-delay:${g*.7}s">${Array.from({length:g+1},(_,j)=>`<rect x="${52+g*82}" y="${170-j*34}" width="56" height="28" rx="4" fill="${j===g?'var(--accent)':'var(--accent-soft)'}" stroke="var(--accent)" stroke-width="1"/>`).join('')}<text class="t-l" x="${80+g*82}" y="222" text-anchor="middle">${g+1}ª</text></g>`).join('')}<line x1="30" y1="204" x2="370" y2="204" stroke="var(--line)"/></svg>`,
 newcombe:`<svg viewBox="0 0 400 210">${[['Quantità',100,190],['Peso',170,290],['Volume',230,360]].map(([t,a,b],i)=>`<text class="t-s" font-size="15" x="16" y="${50+i*50}">${t}</text><rect class="bar" style="animation-delay:${i*.6}s" x="${a}" y="${36+i*50}" width="${b-a}" height="24" rx="12" fill="${['var(--accent)','#4f7a62','#7d9a83'][i]}"/>`).join('')}<line x1="100" y1="180" x2="370" y2="180" stroke="var(--ink)"/><path d="${arrow(370,180,1,0)}" stroke="var(--ink)" fill="none"/><text class="t-l" x="370" y="200" text-anchor="end">età</text></svg>`,
-crone:`<svg viewBox="0 0 400 274"><g transform="translate(-2 4) scale(.86)"><ellipse class="reg" cx="140" cy="170" rx="62" ry="58"/><path class="reg" style="animation-delay:2s" d="M262 236 C282 214 326 218 338 244 C330 262 300 256 286 252 C276 262 258 256 262 236Z"/><g class="reg" style="animation-delay:4s"><circle cx="205" cy="218" r="22"/><circle cx="372" cy="226" r="22"/></g><path d="${BRAIN}" fill="none" stroke="var(--ink)" stroke-width="2"/></g>
-<text class="t-l" x="200" y="262" text-anchor="middle">prefrontale · ippocampo · linguaggio</text></svg>`
+crone:`<svg viewBox="0 0 400 300"><g transform="translate(-36 -4) scale(.86)"><ellipse class="reg" cx="140" cy="170" rx="62" ry="58"/><path class="reg" style="animation-delay:2s" d="M262 236 C282 214 326 218 338 244 C330 262 300 256 286 252 C276 262 258 256 262 236Z"/><g class="reg" style="animation-delay:4s"><circle cx="205" cy="218" r="22"/><circle cx="372" cy="226" r="22"/></g><path d="${BRAIN}" fill="none" stroke="var(--ink)" stroke-width="2"/></g>
+<text class="t-l" x="200" y="284" text-anchor="middle">prefrontale · ippocampo · linguaggio</text></svg>`
 };
 
 const A=[
-{id:'laland',j:'Annual Review of Psychology · 2021',t:'Understanding Human Cognitive Uniqueness',a:'Kevin N. Laland, Amanda Seed',doi:'10.1146/annurev-psych-062220-051256',
-en:'Humans have long regarded themselves as intellectually superior to other species, yet what makes human cognition unique remains poorly understood. The authors review comparative, developmental and neuroscientific evidence on the leading candidates — mental time travel, tool use, problem solving, social cognition and communication. They conclude that no single uniquely human ability explains our cognitive performance. Humans emerge instead as flexible “cognitive all-rounders”, whose distinctiveness arises from the interaction and mutual reinforcement of many cognitive domains.',
-it:'Da millenni l’uomo si considera intellettualmente superiore alle altre specie, eppure ciò che rende unica la cognizione umana resta poco compreso. Gli autori esaminano le prove comparative, evolutive e neuroscientifiche sui principali candidati: il viaggio mentale nel tempo, l’uso di strumenti, la risoluzione di problemi, la cognizione sociale e la comunicazione. La conclusione è che nessuna singola abilità esclusivamente umana spiega le nostre prestazioni. L’uomo appare piuttosto come un “tuttofare cognitivo” flessibile, la cui particolarità nasce dall’interazione e dal rafforzamento reciproco di molti domini cognitivi.',
-p:'Come Piaget, gli autori non cercano una facoltà innata che ci renda umani: l’intelligenza nasce dall’integrazione di capacità diverse. È l’idea di organizzazione, uno degli invarianti funzionali: le strutture si coordinano in una totalità.'},
-{id:'fire',j:'Proceedings of the Royal Society B · 2026',t:'Firelight and the Origins of Spoken Language',a:'Catherine Hobaiter, Nathaniel J. Dominy',doi:'10.1098/rspb.2026.0602',
-en:'Why did humans evolve spoken language? Explanations based on practical needs, such as hunting, tool-making or teaching, are weakened by evidence that other species manage these tasks without language. The authors propose that the controlled use of fire created a new social space after dark. Firelight is bright enough to see gestures, but its flicker makes them hard to follow, favouring the voice; its low blue light extends the evening without disrupting sleep. These extra hours around the fire would have favoured storytelling: sharing past events, distant places and imagined futures. The review sets out testable predictions for the hypothesis.',
-it:'Perché l’uomo ha sviluppato il linguaggio parlato? Le spiegazioni basate su bisogni pratici, come la caccia, la fabbricazione di strumenti o l’insegnamento, sono indebolite dal fatto che altre specie svolgono questi compiti senza linguaggio. Gli autori propongono che l’uso controllato del fuoco abbia creato un nuovo spazio sociale dopo il tramonto. La luce del fuoco basta per vedere i gesti, ma il suo tremolio li rende difficili da seguire e favorisce la voce; la sua scarsa luce blu allunga la serata senza disturbare il sonno. Queste ore in più attorno al fuoco avrebbero favorito il racconto: condividere eventi passati, luoghi lontani e futuri immaginati. La rassegna formula previsioni verificabili per questa ipotesi.',
-p:'Per Piaget il linguaggio è uno dei segni della funzione simbolica: permette di evocare ciò che non è presente. L’ipotesi del focolare colloca qui l’origine evolutiva del linguaggio, raccontare il passato e immaginare il futuro: la stessa conquista che il bambino compie nel periodo preoperatorio.'},
-{id:'stout',j:'PNAS · Proceedings of the National Academy of Sciences · 2017',t:'Evolutionary Neuroscience of Cumulative Culture',a:'Dietrich Stout, Erin E. Hecht',doi:'10.1073/pnas.1620738114',
-en:'No other species approaches the extent, diversity and complexity of human culture, yet how this came about remains unclear. The authors develop a mechanistic, evolutionary-neuroscience account of cumulative culture, drawing on experimental, developmental, comparative and archaeological evidence such as stone-tool making. Cumulative culture is treated not as a single capacity but as a complex trait that emerged gradually, building on enhanced visuomotor integration in fronto-parietal networks. Skills are acquired through a “helical curriculum” of observation, practice and social feedback, within environments that each generation reshapes for the next.',
-it:'Nessun’altra specie si avvicina all’estensione, alla varietà e alla complessità della cultura umana, ma come ciò sia avvenuto resta poco chiaro. Gli autori propongono una spiegazione meccanicistica, di neuroscienze evolutive, della cultura cumulativa, basata su prove sperimentali, evolutive, comparative e archeologiche come la fabbricazione di strumenti in pietra. La cultura cumulativa non è vista come una capacità unica, ma come un tratto complesso emerso gradualmente, che poggia su una migliore integrazione visuo-motoria nelle reti fronto-parietali. Le abilità si acquisiscono attraverso un “curriculum a elica” di osservazione, pratica e feedback sociale, in ambienti che ogni generazione modifica per la successiva.',
-p:'Il curriculum a elica ricorda l’equilibrazione: ogni ciclo di pratica riorganizza le competenze e porta a un livello più alto. E la distinzione tra il “cosa” e il “come” richiama lo schema d’azione: per conoscere bisogna agire, non solo osservare il risultato.'},
-{id:'legare',j:'Annual Review of Developmental Psychology · 2019',t:'The Development of Cumulative Cultural Learning',a:'Cristine H. Legare',doi:'10.1146/annurev-devpsych-121318-084848',
-en:'Human culture is unique among animals in its complexity, variability and cumulative character. Children grow up in cultural ecologies of knowledge, practices and technologies that are inherited and modified over generations. The learning processes that make cultural transmission possible are universal, yet flexible enough to accommodate very diverse cultural repertoires. Children learn culture through exploration, observation, participation, imitation and instruction, in proportions that vary with each community’s socialization practices. Studying how children acquire and pass on culture offers insight into both the evolution and the development of human cognition.',
-it:'La cultura umana è unica tra gli animali per complessità, variabilità e carattere cumulativo. I bambini crescono in ecologie culturali fatte di conoscenze, pratiche e tecnologie ereditate e modificate di generazione in generazione. I processi di apprendimento che rendono possibile la trasmissione culturale sono universali, ma abbastanza flessibili da adattarsi a repertori culturali molto diversi. I bambini imparano la cultura esplorando, osservando, partecipando, imitando e ricevendo istruzioni, in proporzioni che variano con le pratiche educative di ogni comunità. Studiare come i bambini acquisiscono e trasmettono la cultura aiuta a capire sia l’evoluzione sia lo sviluppo della cognizione umana.',
-p:'Il bambino costruisce attivamente la conoscenza, come voleva Piaget, ma dentro un ambiente culturale che lo guida. È proprio ciò che il capitolo indica come limite di Piaget: il peso del contesto sociale e della trasmissione.'},
-{id:'newcombe',j:'WIREs Cognitive Science · 2013',t:'Cognitive Development: Changing Views of Cognitive Change',a:'Nora S. Newcombe',doi:'10.1002/wcs.1245',
-en:'Research on cognitive development seeks to explain the origins of human knowledge and to account for how cognition changes. This article traces how views on these questions have shifted: from the beginnings of psychology, through the cognitive revolution and Piaget, to the alternatives that followed, including nativism, Vygotskian theory and information-processing approaches. It closes by outlining current versions of nativism, constructivism and empiricism.',
-it:'La ricerca sullo sviluppo cognitivo cerca di spiegare le origini della conoscenza umana e il modo in cui la cognizione cambia. L’articolo ricostruisce come le risposte a queste domande si sono trasformate: dagli inizi della psicologia, attraverso la rivoluzione cognitiva e Piaget, fino alle alternative successive, tra cui l’innatismo, la teoria di Vygotskij e l’approccio dell’elaborazione dell’informazione. Si chiude presentando le versioni attuali di innatismo, costruttivismo ed empirismo.',
-p:'Piaget è il punto di svolta di questa storia. I suoi limiti, gli stadi troppo rigidi, i décalage, una struttura unica, hanno aperto la strada a nuove teorie, che però conservano l’idea costruttivista di un bambino attivo.'},
-{id:'crone',j:'Developmental Cognitive Neuroscience · 2011',t:'The Developing Brain: From Theory to Neuroimaging and Back',a:'Eveline A. Crone, K. Richard Ridderinkhof',doi:'10.1016/j.dcn.2010.12.001',
-en:'Surprisingly little progress has been made in understanding how brain growth maps onto mental growth during childhood. This review links recent neuroimaging findings on brain maturation with classic behavioural theories of cognitive development, focusing on self-regulation and internal control, with working memory as a case study. It argues that developmental neuroimaging can benefit from established developmental theories, and that those theories can in turn be refined by knowing how different brain structures and functions mature.',
-it:'Sorprendentemente, si è capito poco di come la crescita del cervello corrisponda alla crescita della mente durante l’infanzia. La rassegna collega le recenti scoperte di neuroimaging sulla maturazione cerebrale alle teorie classiche dello sviluppo cognitivo, concentrandosi sull’autoregolazione e sul controllo interno, con la memoria di lavoro come caso di studio. Sostiene che il neuroimaging dello sviluppo può trarre vantaggio dalle teorie evolutive consolidate e che queste, a loro volta, possono essere affinate conoscendo come maturano le diverse strutture e funzioni del cervello.',
-p:'È il ponte tra Piaget e le neuroscienze: le teorie classiche diventano ipotesi da verificare nel cervello. La lenta maturazione della corteccia prefrontale, per esempio, aiuta a spiegare l’errore A non B e il passaggio a un pensiero più controllato.'}
+{id:'laland',j:'Annual Review of Psychology · 2021',t:'Understanding Human Cognitive Uniqueness',a:'Kevin N. Laland, Amanda Seed',doi:'10.1146/annurev-psych-062220-051256'},
+{id:'fire',j:'Proceedings of the Royal Society B · 2026',t:'Firelight and the Origins of Spoken Language',a:'Catherine Hobaiter, Nathaniel J. Dominy',doi:'10.1098/rspb.2026.0602'},
+{id:'stout',j:'PNAS · Proceedings of the National Academy of Sciences · 2017',t:'Evolutionary Neuroscience of Cumulative Culture',a:'Dietrich Stout, Erin E. Hecht',doi:'10.1073/pnas.1620738114'},
+{id:'legare',j:'Annual Review of Developmental Psychology · 2019',t:'The Development of Cumulative Cultural Learning',a:'Cristine H. Legare',doi:'10.1146/annurev-devpsych-121318-084848'},
+{id:'newcombe',j:'WIREs Cognitive Science · 2013',t:'Cognitive Development: Changing Views of Cognitive Change',a:'Nora S. Newcombe',doi:'10.1002/wcs.1245'},
+{id:'crone',j:'Developmental Cognitive Neuroscience · 2011',t:'The Developing Brain: From Theory to Neuroimaging and Back',a:'Eveline A. Crone, K. Richard Ridderinkhof',doi:'10.1016/j.dcn.2010.12.001'}
 ];
 
 const go='<svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+const down='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
 document.getElementById('list').innerHTML=A.map((x,i)=>`<article id="${x.id}">
 <span class="num">${String(i+1).padStart(2,'0')}</span>
 <span class="journal">${x.j}</span>
 <h2>${x.t}</h2>
 <p class="authors">${x.a}</p>
 <div class="fig">${FIG[x.id]}</div>
-<p class="lab"><span class="lbl-abs">Abstract · sintesi</span></p>
-<div class="abs"><p class="en" lang="en">${x.en}</p><p class="it" lang="it">${x.it}</p></div>
-<div class="piaget"><p class="lab">Come si collega a Piaget</p><p>${x.p}</p></div>
+<p class="lab">Abstract</p>
+<div class="abs" data-doi="${x.doi}"><div class="txt"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div><button class="more"><span>Espandi</span>${down}</button></div>
 <a class="doi" href="https://doi.org/${x.doi}" target="_blank" rel="noopener"><span><small>Leggi l’articolo originale</small>doi.org/${x.doi}</span><i>${go}</i></a>
 </article>`).join('');
 
-/* Traduci */
+/* Abstract originali, letti dagli archivi pubblici (Crossref, Europe PMC, Semantic Scholar) */
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const clean=s=>{const d=new DOMParser().parseFromString('<div>'+s.replace(/<jats:title>[\s\S]*?<\/jats:title>/gi,'').replace(/<\/?jats:p[^>]*>/gi,'\n\n').replace(/<jats:sec[^>]*>|<\/jats:sec>/gi,'')+'</div>','text/html');return d.body.textContent.split(/\n\s*\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean)};
+async function getJSON(u){const r=await fetch(u);if(!r.ok)throw 0;return r.json()}
+async function fetchAbstract(doi){
+  const c=store.get('abs:'+doi);if(c)return c;
+  const tries=[
+    async()=>{const j=await getJSON('https://api.crossref.org/works/'+encodeURIComponent(doi));return j.message.abstract&&clean(j.message.abstract)},
+    async()=>{const j=await getJSON('https://www.ebi.ac.uk/europepmc/webservices/rest/search?format=json&resultType=core&query=DOI:%22'+encodeURIComponent(doi)+'%22');const a=j.resultList.result[0]?.abstractText;return a&&clean(a)},
+    async()=>{const j=await getJSON('https://api.semanticscholar.org/graph/v1/paper/DOI:'+encodeURIComponent(doi)+'?fields=abstract');return j.abstract&&[j.abstract]}];
+  for(const f of tries){try{const r=await f();if(r&&r.join(' ').length>80){store.set('abs:'+doi,r);return r}}catch(e){}}
+  return null}
+const ORIG={},IT={};
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function show(box,paras,lang){const t=box.querySelector('.txt');t.lang=lang;t.innerHTML=paras.map(p=>`<p>${esc(p)}</p>`).join('');box.classList.remove('swap');void box.offsetWidth;box.classList.add('swap');requestAnimationFrame(()=>box.classList.toggle('long',box.classList.contains('open')||t.scrollHeight>t.clientHeight+4))}
+document.querySelectorAll('.abs').forEach(async box=>{
+  box.querySelector('.more').onclick=()=>{const o=box.classList.toggle('open');box.querySelector('.more span').textContent=o?'Riduci':'Espandi';if(!o)box.closest('article').scrollIntoView({block:'start'})};
+  const doi=box.dataset.doi,a=await fetchAbstract(doi);
+  if(!a){box.querySelector('.txt').innerHTML='<p class="miss">Abstract non disponibile senza connessione. Lo trovi nel link qui sotto.</p>';return}
+  ORIG[doi]=a;show(box,document.body.classList.contains('it')&&IT[doi]?IT[doi]:a,'en');
+  if(document.body.classList.contains('it'))translateBox(box)});
+
+/* Traduci (traduzione automatica al momento) */
+function chunks(text,n){const s=text.match(/[^.!?]+[.!?]+["”’)]*\s*|.+$/g)||[text];const out=[];let cur='';for(const x of s){if((cur+x).length>n&&cur){out.push(cur);cur=''}cur+=x}if(cur)out.push(cur);return out}
+async function trText(text){
+  try{const j=await getJSON('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=it&dt=t&q='+encodeURIComponent(text));return j[0].map(x=>x[0]).join('')}catch(e){}
+  const parts=[];for(const c of chunks(text,450)){const j=await getJSON('https://api.mymemory.translated.net/get?langpair=en|it&q='+encodeURIComponent(c));parts.push(j.responseData.translatedText)}return parts.join(' ')}
+async function translateBox(box){const doi=box.dataset.doi;if(!ORIG[doi])return;
+  if(!IT[doi]){IT[doi]=store.get('it:'+doi);if(!IT[doi]){try{IT[doi]=await Promise.all(ORIG[doi].map(trText));store.set('it:'+doi,IT[doi])}catch(e){IT[doi]=null;return}}}
+  if(document.body.classList.contains('it'))show(box,IT[doi],'it')}
 const tr=document.getElementById('tr'),trL=document.getElementById('trL');
-tr.onclick=()=>{const it=document.body.classList.toggle('it');document.body.classList.remove('swap');void document.body.offsetWidth;document.body.classList.add('swap');tr.setAttribute('aria-pressed',it);trL.textContent=it?'Testo originale (EN)':'Traduci in italiano'};
+tr.onclick=async()=>{const it=document.body.classList.toggle('it');tr.setAttribute('aria-pressed',it);
+  if(it){trL.textContent='Traduzione…';await Promise.all([...document.querySelectorAll('.abs')].map(translateBox));trL.textContent='Testo originale (EN)'}
+  else{trL.textContent='Traduci in italiano';document.querySelectorAll('.abs').forEach(b=>{const d=b.dataset.doi;if(ORIG[d])show(b,ORIG[d],'en')})}};
 
 /* Animazioni solo quando la figura è visibile */
 const io=new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('play',e.isIntersecting)),{threshold:.35});

@@ -7,7 +7,7 @@ Apri **[Presentazione-Piaget.html](Presentazione-Piaget.html)** con un doppio cl
 Comandi, in basso: **Indietro**, **Ripeti** (solo nelle slide con animazione, la fa ripartire) e **Avanti**. Le animazioni partono da sole all'apertura di ogni slide. In alto: **Ricomincia dall'inizio**.
 Da tastiera: **→ / spazio** avanti, **←** indietro, **R** ripeti, **Home** dall'inizio.
 
-Il tasto **A** apre l'articolo citato nella slide (premuto di nuovo passa al successivo o chiude). L'ultima slide ha un QR code che porta a **[articoli.html](articoli.html)**, la pagina per smartphone con le sintesi degli abstract (EN/IT) e il legame con Piaget.
+Il tasto **A** apre l'articolo citato nella slide (premuto di nuovo passa al successivo o chiude). L'ultima slide ha un QR code che porta a **[articoli.html](articoli.html)**, la pagina per smartphone con gli abstract originali (letti al momento da Crossref/Europe PMC) e il tasto Traduci.
 
 La versione precedente, più lunga, è in `Presentazione-Piaget-vecchia.html`.
 
