@@ -180,6 +180,7 @@ function spiral(cx,cy,a,b,turns,step=.08){let d='';for(let t=0;t<=turns*2*Math.P
 const BRAIN='M103 268 C65 238 65 190 93 163 C85 125 120 89 157 95 C180 52 235 62 257 86 C300 50 345 64 359 94 C412 85 455 122 447 158 C483 184 474 230 445 250 C440 282 410 295 370 285 C342 310 302 297 280 280 C235 300 210 285 195 267 C155 285 130 275 103 268Z';
 const SULCI='M253 89 C240 135 275 152 258 185 M360 104 C330 150 384 170 365 200 M105 163 C132 168 133 194 154 189 M410 140 C385 129 369 138 372 153 M290 101 C310 133 285 150 298 178';
 
+const SPEED=.6; /* ritmo delle animazioni: più basso = più veloce */
 const SL=[];
 const slide=o=>SL.push(Object.assign({steps:1,apply(){}},o));
 
@@ -368,7 +369,7 @@ apply(n){$$('.fit').forEach(e=>{if(e.getComputedTextLength()>158)e.setAttribute(
 {const caps=[['Nascosto in A','t-cap mid'],['Spostato in B','t-cap mid'],['…ma lo cerca in A','t-cap mid warm'],['Contano memoria e inibizione','t-cap mid green']];
  const cup=(id,x,l)=>`<g transform="translate(${x} 0)"><g class="cup" id="${id}"><path d="M-82 400 L-68 276 Q0 234 68 276 L82 400Z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/></g><text class="t-serif mid" x="0" y="456" style="fill:var(--muted)">${l}</text></g>`;
  const up=(id,b)=>$('#'+id).classList.toggle('up',b);
-slide({gap:[3000,3600,2800],steps:4,
+slide({gap:[3200,4500,3000],steps:4,
 html:copy('Stadio 1 · 0–2 anni','Il periodo<br><em>sensomotorio</em>',{chips:['schema d’azione','permanenza dell’oggetto','errore A non B']})+vis(svg(760,540,`
 <style>.cup{transition:transform .75s var(--ease)}.cup.up{transform:translateY(-150px)}#ball{transition:transform 1s var(--ease)}#ball.b{transform:translateX(300px)}</style>
 <line x1="60" y1="400" x2="700" y2="400" class="hair"/>
@@ -500,7 +501,7 @@ function render(i,atEnd=false){
   stage.innerHTML=`<section class="slide ${s.cls||''}">${s.html}</section>`;
   const el=stage.firstElementChild;
   if(atEnd){el.classList.add('instant');s.apply(step,true);void el.offsetWidth;el.classList.remove('instant')}
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add('in');if(atEnd)return;s.apply(0,false);let at=400;for(let k=1;k<s.steps;k++){const g=Array.isArray(s.gap)?s.gap[k-1]:(s.gap||2800);at+=g;later(()=>{step=k;s.apply(k,false)},at)}}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add('in');if(atEnd)return;s.apply(0,false);let at=250;for(let k=1;k<s.steps;k++){const g=Array.isArray(s.gap)?s.gap[k-1]:(s.gap||2800);at+=g*SPEED;later(()=>{step=k;s.apply(k,false)},at)}}));
   ui();
 }
 function go(i,atEnd=false){
