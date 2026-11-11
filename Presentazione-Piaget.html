@@ -503,7 +503,7 @@ apply(n){$$('.dc').forEach(c=>{c.classList.toggle('two',n>=1&&c.dataset.s==='2')
   let dx,dy,dl;
   if(r.l===0){dx=r.n===0?-230:230;dy=0;dl=r.n===1?1.1:0}
   else{const[a,b]=ds[r.l-1];dx=cx/m*60;dy=cy/m*60;dl=(dist(r)-a)/(b-a)*1.3}
-  const fill=r.l===2?'var(--warm-soft)':'var(--accent-soft)',stk=r.l===2?'var(--warm)':'var(--accent)',w=[3,2.2,1.6][r.l];
+  const fill=['var(--accent-soft)','#d3e6f2','var(--warm-soft)'][r.l],stk=['var(--accent)','#4b86ad','var(--warm)'][r.l],w=[3,2.2,1.6][r.l];
   return `<path class="pz" data-n="${r.n}" d="${path(r)}" fill="${fill}" stroke="${stk}" stroke-width="${w}" stroke-linejoin="round" style="--dx:${f(dx)}px;--dy:${f(dy)}px;--d:${f(dl)}s"/>`}).join('');
 slide({cls:'full',gap:[2800,2800,3600],steps:4,
 html:vis(`<style>.pz{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.9);transform-box:fill-box;transform-origin:center;transition:opacity .7s var(--ease) var(--d),transform 1.1s var(--ease) var(--d)}.pz.on{opacity:1;transform:none}</style><svg viewBox="95 90 580 420" aria-hidden="true">${pieces}</svg>`),
