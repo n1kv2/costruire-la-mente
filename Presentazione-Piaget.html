@@ -34,6 +34,7 @@ h1 em,h2 em{color:var(--accent)}
 .visual{opacity:0;transform:translateY(16px);transition:opacity 1s var(--ease) .15s,transform 1.2s var(--ease) .15s;display:flex;justify-content:center}
 .slide.in .visual{opacity:1;transform:none}
 .visual svg{width:100%;height:auto;max-height:680px;overflow:visible}
+.slide.full{display:flex;justify-content:center;align-items:center;padding:60px 120px 130px}.full .visual{width:1000px}.full .visual svg{max-height:none}
 
 /* Parole chiave */
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px;max-width:520px}
@@ -467,7 +468,48 @@ html:copy('Stadio 4 · dagli 11 anni','Il periodo<br><em>operatorio formale</em>
 <div class="dwrap"><p class="dq">Due dadi: esce più spesso 2 o 7?</p><div class="dice"><div class="dgrid">${cells}</div><div class="res"><div id="r2"><span>somma 2</span><b style="color:var(--warm)">1/36</b></div><div id="r7"><span>somma 7</span><b style="color:var(--accent)">6/36</b></div></div></div></div>`),
 apply(n){$$('.dc').forEach(c=>{c.classList.toggle('two',n>=1&&c.dataset.s==='2');c.classList.toggle('seven',n>=2&&c.dataset.s==='7')});$('#r2').classList.toggle('on',n>=1);$('#r7').classList.toggle('on',n>=2)}});}
 
-/* 21 · Limiti: décalage */
+/* 21 · Integrazione gerarchica (puzzle, senza scritte) */
+{const R=[];const add=(x,y,s,l,n)=>R.push({x,y,s,l,n});
+ add(230,225,150,0,0);add(380,225,150,0,1);
+ for(let i=0;i<6;i++){add(155+75*i,150,75,1,2);add(155+75*i,375,75,1,2)}
+ for(const y of[225,300]){add(155,y,75,1,2);add(530,y,75,1,2)}
+ for(let i=0;i<14;i++){add(117.5+37.5*i,112.5,37.5,2,3);add(117.5+37.5*i,450,37.5,2,3)}
+ for(let j=0;j<8;j++){add(117.5,150+37.5*j,37.5,2,3);add(605,150+37.5*j,37.5,2,3)}
+ R.forEach(r=>r.k={t:[],r:[],b:[],l:[]});
+ const E=.01,ov=(a0,a1,b0,b1)=>Math.min(a1,b1)-Math.max(a0,b0);
+ const link=(P,sp,Q,sq,lo,hi,i,j)=>{const c=(lo+hi)/2;let kk,tp,tq;
+  if(P.l!==Q.l){const ch=P.l>Q.l?P:Q;kk=ch.s;tp=P.l>Q.l?1:-1;tq=-tp}
+  else{kk=P.s;tp=(i+j)%2?1:-1;tq=-tp}
+  P.k[sp].push({c,k:kk,g:tp});Q.k[sq].push({c,k:kk,g:tq})};
+ for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++){const P=R[i],Q=R[j];
+  if(Math.abs(P.x+P.s-Q.x)<E){const o=ov(P.y,P.y+P.s,Q.y,Q.y+Q.s);if(o>E)link(P,'r',Q,'l',Math.max(P.y,Q.y),Math.min(P.y+P.s,Q.y+Q.s),i,j)}
+  else if(Math.abs(Q.x+Q.s-P.x)<E){const o=ov(P.y,P.y+P.s,Q.y,Q.y+Q.s);if(o>E)link(P,'l',Q,'r',Math.max(P.y,Q.y),Math.min(P.y+P.s,Q.y+Q.s),i,j)}
+  if(Math.abs(P.y+P.s-Q.y)<E){const o=ov(P.x,P.x+P.s,Q.x,Q.x+Q.s);if(o>E)link(P,'b',Q,'t',Math.max(P.x,Q.x),Math.min(P.x+P.s,Q.x+Q.s),i,j)}
+  else if(Math.abs(Q.y+Q.s-P.y)<E){const o=ov(P.x,P.x+P.s,Q.x,Q.x+Q.s);if(o>E)link(P,'t',Q,'b',Math.max(P.x,Q.x),Math.min(P.x+P.s,Q.x+Q.s),i,j)}}
+ const f=v=>v.toFixed(1);
+ const side=(st,d,o,len,knobs)=>{let p='';const pt=(a,b)=>f(st[0]+d[0]*a+o[0]*b)+' '+f(st[1]+d[1]*a+o[1]*b);
+  for(const q of knobs){const k=q.k,g=q.g,a=q.a,u=(du,dv)=>pt(a+du*k,g*dv*k);
+   p+=` L${u(-.14,0)} C${u(-.14,.06)} ${u(-.20,.10)} ${u(-.20,.17)} C${u(-.20,.28)} ${u(.20,.28)} ${u(.20,.17)} C${u(.20,.10)} ${u(.14,.06)} ${u(.14,0)}`}
+  return p+` L${pt(len,0)}`};
+ const path=r=>{const{x,y,s}=r;
+  const T=r.k.t.map(q=>({...q,a:q.c-x})).sort((a,b)=>a.a-b.a),
+        Rt=r.k.r.map(q=>({...q,a:q.c-y})).sort((a,b)=>a.a-b.a),
+        B=r.k.b.map(q=>({...q,a:x+s-q.c})).sort((a,b)=>a.a-b.a),
+        L=r.k.l.map(q=>({...q,a:y+s-q.c})).sort((a,b)=>a.a-b.a);
+  return `M${f(x)} ${f(y)}`+side([x,y],[1,0],[0,-1],s,T)+side([x+s,y],[0,1],[1,0],s,Rt)+side([x+s,y+s],[-1,0],[0,1],s,B)+side([x,y+s],[0,-1],[-1,0],s,L)+'Z'};
+ const dist=r=>Math.hypot(r.x+r.s/2-380,r.y+r.s/2-300);
+ const ds=[1,2,3].map(l=>{const d=R.filter(r=>r.l===l).map(dist);return[Math.min(...d),Math.max(...d)]});
+ const pieces=R.map(r=>{const cx=r.x+r.s/2-380,cy=r.y+r.s/2-300,m=Math.hypot(cx,cy)||1;
+  let dx,dy,dl;
+  if(r.l===0){dx=r.n===0?-230:230;dy=0;dl=r.n===1?1.1:0}
+  else{const[a,b]=ds[r.l-1];dx=cx/m*60;dy=cy/m*60;dl=(dist(r)-a)/(b-a)*1.3}
+  const fill=r.l===2?'var(--warm-soft)':'var(--accent-soft)',stk=r.l===2?'var(--warm)':'var(--accent)',w=[3,2.2,1.6][r.l];
+  return `<path class="pz" data-n="${r.n}" d="${path(r)}" fill="${fill}" stroke="${stk}" stroke-width="${w}" stroke-linejoin="round" style="--dx:${f(dx)}px;--dy:${f(dy)}px;--d:${f(dl)}s"/>`}).join('');
+slide({cls:'full',gap:[2800,2800,3600],steps:4,
+html:vis(`<style>.pz{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.9);transform-box:fill-box;transform-origin:center;transition:opacity .7s var(--ease) var(--d),transform 1.1s var(--ease) var(--d)}.pz.on{opacity:1;transform:none}</style><svg viewBox="95 90 580 420" aria-hidden="true">${pieces}</svg>`),
+apply(n){$$('.pz').forEach(g=>g.classList.toggle('on',+g.dataset.n<=n))}});}
+
+/* 22 · Limiti: décalage */
 {const rows=[['Quantità',150,330],['Peso',290,520],['Volume',420,680]];
 slide({gap:2000,steps:3,
 html:copy('I limiti · 1','Non tutto<br><em>insieme</em>',{chips:['asincronie','décalage orizzontali'],cites:['newcombe']})+vis(svg(760,460,`
@@ -480,7 +522,7 @@ ${rows.map(([t,a,b],i)=>{const y=90+i*100;return `<text class="t-serif" x="0" y=
 <text class="t-cap mid green fade s2" x="430" y="450" style="transition-delay:.9s">stessa logica, età diverse</text>`)),
 apply(n){$$('.bar').forEach(e=>e.classList.toggle('on',+e.dataset.i<=n));on('.s2',n>=2)}});}
 
-/* 22 · Limiti: struttura unica */
+/* 23 · Limiti: struttura unica */
 {const D=[['linguaggio',220,170],['numero',540,170],['spazio',220,370],['oggetti',540,370]];
 slide({gap:3000,steps:2,
 html:copy('I limiti · 2','Una mente,<br><em>tante strutture</em>',{chips:['struttura unitaria','dominio-generale','analogie col comportamentismo']})+vis(svg(760,540,`
@@ -491,7 +533,7 @@ ${D.map(([t,x,y],i)=>`<g class="dom" style="transform:translate(${380-x}px,${270
 apply(n,inst){$('#one').classList.toggle('split',n>=1);$$('.dom').forEach(g=>{g.classList.toggle('on',n>=1);g.style.transform=n>=1?'none':`translate(${g.dataset.x}px,${g.dataset.y}px)`});
  const c=n?['dominio-specifica','t-cap mid green']:['Piaget: dominio-generale','t-cap mid'];if(inst||!n)setText('#limCap',...c);else later(()=>setText('#limCap',...c),700)}});}
 
-/* 23 · Crone & Ridderinkhof */
+/* 24 · Crone & Ridderinkhof */
 {const caps=[['Corteccia prefrontale','pianificazione · inibizione · memoria di lavoro'],['Ippocampo','memoria episodica e spaziale'],['Reti del linguaggio','Broca · Wernicke']];
 slide({gap:[3200,3000],steps:3,
 html:copy('Le neuroscienze dello sviluppo','Dalla teoria<br>al <em>cervello</em>',{cites:['crone']})+vis(svg(760,620,`
@@ -507,7 +549,7 @@ html:copy('Le neuroscienze dello sviluppo','Dalla teoria<br>al <em>cervello</em>
 apply(n,inst){on('.s0');on('.s2',n>=2);$$('.reg').forEach(r=>{const i=+r.dataset.i;r.classList.toggle('on',i<=n);r.classList.toggle('cur',i===n)});
  const go=()=>{setText('#crT',caps[n][0]);setText('#crS',caps[n][1])};if(inst)go();else later(go,n?300:1500)}});}
 
-/* 24 · Potatura sinaptica */
+/* 25 · Potatura sinaptica */
 {const P=[[95,200],[180,95],[205,320],[300,165],[345,305],[435,80],[495,230],[395,200]].map(([x,y])=>[x*1.25+5,y*1.25+20]);
  const strong=new Set(['0-3','1-3','3-5','3-4','2-4','4-6','5-6','3-7']),E=[];for(let i=0;i<8;i++)for(let j=i+1;j<8;j++)E.push([i,j]);
 slide({gap:3200,steps:2,
@@ -520,12 +562,12 @@ ${P.map(([x,y],i)=>`<circle class="nd fade s0" style="transition-delay:${200+i*6
 <text id="plCap" class="t-cap mid green" x="380" y="525"></text>`)),
 apply(n,inst){on('.s0');$('#net').classList.toggle('re',n>=1);const c=n?['usate: rafforzate · non usate: eliminate','t-cap mid green']:['all’inizio, moltissime connessioni','t-cap mid'];if(inst)setText('#plCap',...c);else later(()=>setText('#plCap',...c),n?900:1400)}});}
 
-/* 25 · Chiusura */
+/* 26 · Chiusura */
 slide({gap:1600,steps:4,cls:'final',
 html:`<div class="copy"><p class="kicker">In sintesi</p><h2>Come si costruisce<br>la <em>conoscenza?</em></h2><div class="levels">${[['evoluzione','Specie'],['Piaget','Individuo'],['neuroscienze','Cervello']].map(([a,b],i)=>`<div class="lvl" data-i="${i}"><span>${a}</span><b>${b}</b></div>`).join('')}</div></div>`,
 apply(n){$$('.lvl').forEach(l=>l.classList.toggle('on',+l.dataset.i<n))}});
 
-/* 26 · QR code articoli */
+/* 27 · QR code articoli */
 slide({gap:1800,steps:2,
 html:copy('Per approfondire','Gli articoli<br>sul tuo <em>telefono</em>',{sub:'Inquadra il codice: sintesi degli abstract, traduzione e legame con Piaget.'})+vis(svg(760,600,`
 <style>.qrc{transform-origin:380px 280px}#scan{opacity:0}.on #scan,#scan.on{opacity:1;animation:scan 2.6s ease-in-out infinite}@keyframes scan{0%,100%{transform:translateY(0)}50%{transform:translateY(330px)}}</style>
@@ -536,7 +578,7 @@ html:copy('Per approfondire','Gli articoli<br>sul tuo <em>telefono</em>',{sub:'I
 apply(n){on('.s0');on('.s1',n>=1)}});
 
 /* tag filogenesi/ontogenesi */
-SL.forEach((s,i)=>{s.tag=(i>=2&&i<=6)?'filo':(i>=8&&i<=23)?'onto':''});
+SL.forEach((s,i)=>{s.tag=(i>=2&&i<=6)?'filo':(i>=8&&i<=24)?'onto':''});
 
 /* ---------- Pop-up articoli ---------- */
 const dlg=byId('paper');
