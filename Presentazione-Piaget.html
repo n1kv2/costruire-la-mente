@@ -355,15 +355,28 @@ html:copy('Piaget · il costruttivismo','Conoscere<br>è <em>costruire</em>',{su
 <path class="green-stroke fade s2" style="transition-delay:.9s" d="${head(262,338,-68,-98)}"/>
 <text class="t-label green mid fade s2" x="380" y="466" style="transition-delay:.4s">si trasforma</text>
 <line class="hair fade s3" x1="60" y1="505" x2="700" y2="505"/>
-<text class="t-label mid fade s3" x="380" y="540">quattro meccanismi</text>
-${[['assimilazione',210,590],['accomodamento',550,590],['organizzazione',210,636],['equilibrazione',550,636]].map(([t,x,y],i)=>`<text class="t-serif mid green rise s3" style="transition-delay:${.2+i*.15}s;font-style:italic" font-size="28" x="${x}" y="${y}">${t}</text>`).join('')}`)),
+<text class="t-label mid fade s3" x="380" y="540">tre funzioni invarianti</text>
+${[['adattamento',380,590],['organizzazione',210,636],['equilibrazione',550,636]].map(([t,x,y],i)=>`<text class="t-serif mid green rise s3" style="transition-delay:${.2+i*.15}s;font-style:italic" font-size="28" x="${x}" y="${y}">${t}</text>`).join('')}`)),
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);on('.s3',n>=3);$$('.ring').forEach(r=>r.classList.toggle('tint',n>=2))}});
 
-/* 13 · Assimilazione e accomodamento */
+/* 13 · Continuità e discontinuità */
+{const X=[122,287,452,617],Y=[340,280,220,160],ages=['0–2','2–7','7–11','11+'];
+slide({gap:[3000,3200],steps:3,
+html:copy('Piaget · lo sviluppo','Continuità<br>e <em>discontinuità</em>',{sub:'Una sola linea di sviluppo, quattro modi di pensare.'})+vis(svg(760,610,`
+<path class="green-stroke draw s0" pathLength="1" stroke-width="5" style="transition-duration:2s" d="M40 430 L720 430"/>
+<g class="fade s0" style="transition-delay:.8s"><text class="t-serif green" x="40" y="480" font-size="34">continuità</text><text class="t-label" x="40" y="510">funzioni invarianti</text><text class="t-label green" x="40" y="540">adattamento · organizzazione · equilibrazione</text></g>
+<path class="warm-stroke draw s1" pathLength="1" stroke-width="4" style="transition-duration:2.2s" d="M40 340 H205 V280 H370 V220 H535 V160 H700"/>
+${X.map((x,i)=>`<g class="fade s1" style="transition-delay:${.4+i*.45}s"><text class="t-label mid warm" x="${x}" y="${Y[i]-16}">${ages[i]}</text></g>`).join('')}
+<g class="fade s1" style="transition-delay:1.4s"><text class="t-serif warm" x="40" y="70" font-size="34">discontinuità</text><text class="t-label" x="40" y="100">gli stadi, uno dopo l’altro</text></g>
+${X.map((x,i)=>`<line class="fade s2" style="transition-delay:${i*.2}s" x1="${x}" y1="${Y[i]+12}" x2="${x}" y2="420" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 8" stroke-linecap="round"/>`).join('')}
+<text class="t-cap mid green fade s2" x="380" y="596" style="transition-delay:.6s">cambiano le strutture, restano le funzioni</text>`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});}
+
+/* 14 · Assimilazione e accomodamento */
 {const pos=['translate(0px,0px)','translate(-188px,0px)','translate(-60px,0px) rotate(90deg)','translate(-400px,0px) rotate(90deg)'];
  const lab=[['Assimilazione','t-serif mid'],['Non passa…','t-serif mid warm'],['Accomodamento','t-serif mid green'],['Adattamento','t-serif mid green']];
 slide({gap:2600,steps:4,
-html:copy('Come cambiano gli schemi','Assimilare<br>e <em>accomodare</em>',{chips:['schema','adattamento']})+vis(svg(760,560,`
+html:copy('Prima funzione · l’adattamento','Assimilare<br>e <em>accomodare</em>',{chips:['schema','adattamento']})+vis(svg(760,560,`
 <style>#stick{transform-box:fill-box;transform-origin:center;transition:transform 1s var(--ease)}#stick.bump{animation:bump .5s .85s}@keyframes bump{30%{translate:9px 0}60%{translate:-3px 0}}</style>
 ${Array.from({length:8},(_,i)=>`<circle cx="380" cy="${70+i*54}" r="9" fill="var(--ink)"/>`).join('')}
 <line x1="380" y1="40" x2="380" y2="480" class="hair" stroke-dasharray="3 8"/>
@@ -371,10 +384,10 @@ ${Array.from({length:8},(_,i)=>`<circle cx="380" cy="${70+i*54}" r="9" fill="var
 <text id="adLab" class="t-serif mid" x="380" y="540" font-size="38">Assimilazione</text>`)),
 apply(n,instant){const st=$('#stick');st.style.transform=pos[n];st.classList.toggle('bump',n===1&&!instant);setText('#adLab',...lab[n])}});}
 
-/* 14 · Equilibrazione */
+/* 15 · Organizzazione ed equilibrazione */
 {const lab=[['Equilibrio','t-cap mid'],['Disequilibrio','t-cap mid warm'],['Nuovo equilibrio','t-cap mid green']];
 slide({gap:3000,steps:3,
-html:copy('Il motore del cambiamento','L’<em>equilibrazione</em>',{chips:['organizzazione','conflitto cognitivo','autoregolazione']})+vis(svg(760,580,`
+html:copy('Seconda e terza funzione','Organizzazione<br>ed <em>equilibrazione</em>',{chips:['organizzazione','conflitto cognitivo','autoregolazione']})+vis(svg(760,580,`
 <style>#beam{transform-origin:380px 400px;transition:transform 1.2s var(--spring)}.blk{transition:transform .7s cubic-bezier(.5,0,.75,0),opacity .3s}.blk:not(.on){transform:translateY(-320px);opacity:0}</style>
 <line x1="80" y1="470" x2="680" y2="470" class="hair"/>
 <path d="M380 404 L336 470 L424 470Z" fill="var(--ink)"/>
@@ -388,19 +401,6 @@ apply(n,instant){const beam=$('#beam'),tilt=n===1?'rotate(9deg)':'rotate(0deg)';
   $('#nb').classList.toggle('on',n>=1);$('#cb').classList.toggle('on',n>=2);
   if(instant||n===0){beam.style.transform=tilt;setText('#eqLab',...lab[n]);return}
   later(()=>{beam.style.transform=tilt;setText('#eqLab',...lab[n])},650)}});}
-
-/* 15 · Continuità e discontinuità */
-{const X=[122,287,452,617],Y=[340,280,220,160],ages=['0–2','2–7','7–11','11+'];
-slide({gap:[3000,3200],steps:3,
-html:copy('Piaget · lo sviluppo','Continuità<br>e <em>discontinuità</em>',{sub:'Una sola linea di sviluppo, quattro modi di pensare.'})+vis(svg(760,570,`
-<path class="green-stroke draw s0" pathLength="1" stroke-width="5" style="transition-duration:2s" d="M40 430 L720 430"/>
-<g class="fade s0" style="transition-delay:.8s"><text class="t-serif green" x="40" y="480" font-size="34">continuità</text><text class="t-label" x="40" y="510">funzioni invarianti</text></g>
-<path class="warm-stroke draw s1" pathLength="1" stroke-width="4" style="transition-duration:2.2s" d="M40 340 H205 V280 H370 V220 H535 V160 H700"/>
-${X.map((x,i)=>`<g class="fade s1" style="transition-delay:${.4+i*.45}s"><text class="t-label mid warm" x="${x}" y="${Y[i]-16}">${ages[i]}</text></g>`).join('')}
-<g class="fade s1" style="transition-delay:1.4s"><text class="t-serif warm" x="40" y="70" font-size="34">discontinuità</text><text class="t-label" x="40" y="100">gli stadi, uno dopo l’altro</text></g>
-${X.map((x,i)=>`<line class="fade s2" style="transition-delay:${i*.2}s" x1="${x}" y1="${Y[i]+12}" x2="${x}" y2="420" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 8" stroke-linecap="round"/>`).join('')}
-<text class="t-cap mid green fade s2" x="380" y="558" style="transition-delay:.6s">cambiano le strutture, restano le funzioni</text>`)),
-apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});}
 
 /* 16 · Gli stadi */
 {const st=[['0–2 anni','Sensomotorio','','agire'],['2–7 anni','Preoperatorio','','rappresentare'],['7–11 anni','Operatorio','concreto','coordinare'],['11+ anni','Operatorio','formale','ipotizzare']];
