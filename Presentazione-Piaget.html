@@ -362,14 +362,13 @@ apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);on('.s3',n>=3);$$('.ring').forE
 /* 13 · Continuità e discontinuità */
 {const X=[122,287,452,617],Y=[340,280,220,160],ages=['0–2','2–7','7–11','11+'];
 slide({gap:[3000,3200],steps:3,
-html:copy('Piaget · lo sviluppo','Continuità<br>e <em>discontinuità</em>',{sub:'Una sola linea di sviluppo, quattro modi di pensare.'})+vis(svg(760,610,`
+html:copy('Piaget · lo sviluppo','Continuità<br>e <em>discontinuità</em>',{sub:'Una sola linea di sviluppo, quattro modi di pensare.'})+vis(svg(760,570,`
 <path class="green-stroke draw s0" pathLength="1" stroke-width="5" style="transition-duration:2s" d="M40 430 L720 430"/>
 <g class="fade s0" style="transition-delay:.8s"><text class="t-serif green" x="40" y="480" font-size="34">continuità</text><text class="t-label" x="40" y="510">funzioni invarianti</text><text class="t-label green" x="40" y="540">adattamento · organizzazione · equilibrazione</text></g>
 <path class="warm-stroke draw s1" pathLength="1" stroke-width="4" style="transition-duration:2.2s" d="M40 340 H205 V280 H370 V220 H535 V160 H700"/>
 ${X.map((x,i)=>`<g class="fade s1" style="transition-delay:${.4+i*.45}s"><text class="t-label mid warm" x="${x}" y="${Y[i]-16}">${ages[i]}</text></g>`).join('')}
 <g class="fade s1" style="transition-delay:1.4s"><text class="t-serif warm" x="40" y="70" font-size="34">discontinuità</text><text class="t-label" x="40" y="100">gli stadi, uno dopo l’altro</text></g>
-${X.map((x,i)=>`<line class="fade s2" style="transition-delay:${i*.2}s" x1="${x}" y1="${Y[i]+12}" x2="${x}" y2="420" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 8" stroke-linecap="round"/>`).join('')}
-<text class="t-cap mid green fade s2" x="380" y="596" style="transition-delay:.6s">cambiano le strutture, restano le funzioni</text>`)),
+${X.map((x,i)=>`<line class="fade s2" style="transition-delay:${i*.2}s" x1="${x}" y1="${Y[i]+12}" x2="${x}" y2="420" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 8" stroke-linecap="round"/>`).join('')}`)),
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});}
 
 /* 14 · Assimilazione e accomodamento */
