@@ -187,17 +187,7 @@ const slide=o=>SL.push(Object.assign({steps:1,apply(){}},o));
 /* 1 · Copertina */
 slide({cls:'cover',html:`<img class="cover-img" src="${IMG}" alt=""><div class="copy"><p class="kicker">Jean Piaget</p><h1>Costruire<br>la <em>conoscenza</em></h1><p class="author">Nicholas Vigo</p></div>`});
 
-/* 2 · Piaget biologo */
-slide({gap:3600,steps:2,
-html:copy('Jean Piaget · 1896–1980','Prima di tutto,<br>un <em>biologo</em>',{chips:['malacologo','dottorato 1918','Neuchâtel']})+vis(svg(760,580,`
-<style>#orbit{transform-origin:380px 280px;animation:spin 40s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}</style>
-<path class="warm-stroke draw s0" pathLength="1" style="transition-duration:2.8s" stroke-width="4" d="${spiral(380,280,6,.19,2.75)}"/>
-<g class="fade s1"><g id="orbit"><circle cx="380" cy="280" r="235" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 12" stroke-linecap="round"/></g>
-<text class="t-label green mid" x="380" y="28">ambiente</text></g>
-<text class="t-cap mid fade s1" x="380" y="565" style="transition-delay:.4s">l’intelligenza è <tspan class="green">adattamento</tspan></text>`)),
-apply(n){on('.s0');on('.s1',n>=1)}});
-
-/* 3 · Innato o appreso? da Platone a Baldwin */
+/* 2 · Innato o appreso? da Platone a Baldwin */
 slide({gap:2600,steps:3,
 html:copy('Una domanda antica','Innato<br>o <em>appreso</em>?')+vis(svg(760,520,`
 <line class="hair fade s0" x1="380" y1="30" x2="380" y2="190" stroke-dasharray="4 8"/>
@@ -216,6 +206,16 @@ html:copy('Una domanda antica','Innato<br>o <em>appreso</em>?')+vis(svg(760,520,
 <g class="rise s2" style="transition-delay:.5s"><text class="t-serif mid" x="380" y="500" font-size="42" fill="var(--accent)" font-style="italic" style="fill:var(--accent)">Piaget</text>
 <text class="t-label green" x="412" y="432">metodo scientifico</text></g>`)),
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});
+
+/* 3 · Piaget biologo */
+slide({gap:3600,steps:2,
+html:copy('Jean Piaget · 1896–1980','Prima di tutto,<br>un <em>biologo</em>',{chips:['malacologo','dottorato 1918','Neuchâtel']})+vis(svg(760,580,`
+<style>#orbit{transform-origin:380px 280px;animation:spin 40s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}</style>
+<path class="warm-stroke draw s0" pathLength="1" style="transition-duration:2.8s" stroke-width="4" d="${spiral(380,280,6,.19,2.75)}"/>
+<g class="fade s1"><g id="orbit"><circle cx="380" cy="280" r="235" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 12" stroke-linecap="round"/></g>
+<text class="t-label green mid" x="380" y="28">ambiente</text></g>
+<text class="t-cap mid fade s1" x="380" y="565" style="transition-delay:.4s">l’intelligenza è <tspan class="green">adattamento</tspan></text>`)),
+apply(n){on('.s0');on('.s1',n>=1)}});
 
 /* 4 · Metodo clinico */
 slide({gap:2800,steps:3,
