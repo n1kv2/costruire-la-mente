@@ -188,24 +188,24 @@ const slide=o=>SL.push(Object.assign({steps:1,apply(){}},o));
 slide({cls:'cover',html:`<img class="cover-img" src="${IMG}" alt=""><div class="copy"><p class="kicker">Jean Piaget</p><h1>Costruire<br>la <em>conoscenza</em></h1><p class="author">Nicholas Vigo</p></div>`});
 
 /* 2 · Innato o appreso? da Platone a Baldwin */
-slide({gap:2600,steps:3,
-html:copy('Una domanda antica','Innato<br>o <em>appreso</em>?')+vis(svg(760,520,`
-<line class="hair fade s0" x1="380" y1="30" x2="380" y2="190" stroke-dasharray="4 8"/>
-<g class="rise s0"><text class="t-label green mid" x="170" y="40">Innatismo</text>
-<text class="t-serif mid" x="170" y="102" font-size="38">Platone</text>
-<text class="t-serif mid" x="170" y="156" font-size="38">Cartesio</text></g>
-<g class="rise s0" style="transition-delay:.5s"><text class="t-label warm mid" x="590" y="40">Empirismo</text>
-<text class="t-serif mid" x="590" y="102" font-size="38">Aristotele</text>
-<text class="t-serif mid" x="590" y="156" font-size="38">Locke</text></g>
-<path class="green-stroke draw s1" pathLength="1" stroke-width="2" d="M170 186 C170 250 380 232 380 296"/>
-<path class="warm-stroke draw s1" pathLength="1" stroke-width="2" style="transition-delay:.3s" d="M590 186 C590 250 380 232 380 296"/>
-<g class="rise s1" style="transition-delay:.9s"><text class="t-serif mid" x="380" y="338" font-size="42">Baldwin</text>
-<text class="t-label mid" x="380" y="368">teoria</text></g>
-<path class="green-stroke draw s2" pathLength="1" stroke-width="2" d="M380 402 L380 446"/>
-<path class="green-stroke fade s2" style="transition-delay:.7s" d="${head(380,450,0,1)}"/>
-<g class="rise s2" style="transition-delay:.5s"><text class="t-serif mid" x="380" y="500" font-size="42" fill="var(--accent)" font-style="italic" style="fill:var(--accent)">Piaget</text>
-<text class="t-label green" x="412" y="432">metodo scientifico</text></g>`)),
-apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});
+slide({gap:2600,steps:4,
+html:copy('Una domanda antica','Innato<br>o <em>appreso</em>?')+vis(svg(760,580,`
+<defs><clipPath id="cpR"><circle cx="460" cy="190" r="150"/></clipPath></defs>
+<style>.cL,.cR,.tl,.tr,.lbl,.lbr,#qm{transition:transform 1.5s var(--ease),opacity .9s var(--ease)}.mv .cL{transform:translateX(110px)}.mv .cR{transform:translateX(-110px)}.mv .lbl{transform:translateX(42px)}.mv .lbr{transform:translateX(-42px)}.mv .tl{transform:translateX(-72px)}.mv .tr{transform:translateX(72px)}#qm{transform-origin:380px 190px}.mv #qm{opacity:0;transform:scale(.4)}.pop{transform:scale(.6);transform-origin:380px 190px}.pop.on{transform:none}</style>
+<g id="duo">
+<g class="fade s0"><g class="cL"><circle cx="190" cy="190" r="150" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>
+<g class="tl"><text class="t-label green mid lbl" x="190" y="112">Innatismo</text><text class="t-serif mid" x="190" y="176" font-size="33">Platone</text><text class="t-serif mid" x="190" y="226" font-size="33">Cartesio</text></g></g></g>
+<g class="fade s0" style="transition-delay:.5s"><g class="cR"><circle cx="570" cy="190" r="150" fill="var(--warm-soft)" stroke="var(--warm)" stroke-width="2.5"/>
+<g class="tr"><text class="t-label warm mid lbr" x="570" y="112">Empirismo</text><text class="t-serif mid" x="570" y="176" font-size="33">Aristotele</text><text class="t-serif mid" x="570" y="226" font-size="33">Locke</text></g></g></g>
+<g class="pop fade s1"><text id="qm" class="mid" x="380" y="236" font-family="var(--serif)" font-size="130" font-style="italic" style="fill:var(--ink)">?</text></g>
+<g class="fade s2" style="transition-delay:.9s"><circle cx="300" cy="190" r="150" clip-path="url(#cpR)" fill="var(--accent)" opacity=".28"/>
+<text class="t-serif mid" x="380" y="196" font-size="34">Baldwin</text><text class="t-label mid" x="380" y="228">teoria</text></g>
+</g>
+<path class="green-stroke draw s3" pathLength="1" stroke-width="2.5" d="M380 352 L380 428"/>
+<path class="green-stroke fade s3" style="transition-delay:.7s" d="${head(380,434,0,1)}"/>
+<g class="rise s3" style="transition-delay:.4s"><text class="t-label green" x="414" y="400">metodo scientifico</text>
+<text class="mid" x="380" y="520" font-family="var(--serif)" font-size="68" font-style="italic" style="fill:var(--accent)">Piaget</text></g>`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);on('.s3',n>=3);$('#duo').classList.toggle('mv',n>=2)}});
 
 /* 3 · Piaget biologo */
 slide({gap:3600,steps:2,
@@ -512,13 +512,19 @@ let cur=0,step=0,busy=false;
 const prevB=byId('prev'),nextB=byId('next'),replayB=byId('replay'),restartB=byId('restart');
 function fit(){const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
 addEventListener('resize',fit);fit();
+const splitOf=s=>s.split!==undefined?s.split:Math.ceil(s.steps/2);
+const gapOf=(s,k)=>(Array.isArray(s.gap)?s.gap[k-1]:(s.gap||2800))*SPEED;
+let phase=0;
+function clearT(){timers.forEach(clearTimeout);timers=[]}
+function play(s,from,to,first){let at=first;for(let k=from;k<=to;k++){if(k>from)at+=gapOf(s,k);const kk=k;if(at<=0){step=kk;s.apply(kk,false)}else later(()=>{step=kk;s.apply(kk,false)},at)}}
+function snap(s,k){const el=stage.firstElementChild;el.classList.add('instant');step=k;s.apply(k,true);void el.offsetWidth;el.classList.remove('instant')}
 function render(i,atEnd=false){
-  timers.forEach(clearTimeout);timers=[];citeIdx=-1;if(dlg.open)dlg.close();
-  const s=SL[i];cur=i;step=atEnd?s.steps-1:0;
+  clearT();citeIdx=-1;if(dlg.open)dlg.close();
+  const s=SL[i];cur=i;step=atEnd?s.steps-1:0;phase=(atEnd&&s.steps>1)?1:0;
   stage.innerHTML=`<section class="slide ${s.cls||''}">${s.html}</section>`;
   const el=stage.firstElementChild;
   if(atEnd){el.classList.add('instant');s.apply(step,true);void el.offsetWidth;el.classList.remove('instant')}
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add('in');if(atEnd)return;s.apply(0,false);let at=250;for(let k=1;k<s.steps;k++){const g=Array.isArray(s.gap)?s.gap[k-1]:(s.gap||2800);at+=g*SPEED;later(()=>{step=k;s.apply(k,false)},at)}}));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{el.classList.add('in');if(atEnd)return;s.apply(0,false);play(s,1,splitOf(s)-1,250)}));
   ui();
 }
 function go(i,atEnd=false){
@@ -527,9 +533,17 @@ function go(i,atEnd=false){
   if(el)el.classList.add('out');
   setTimeout(()=>{busy=false;render(i,atEnd);try{history.replaceState(null,'','#'+(i+1))}catch(e){}},el?260:0);
 }
-function next(){if(!busy)go(cur+1)}
-function prev(){go(cur-1,true)}
-function replay(){if(!busy&&SL[cur].steps>1)render(cur)}
+function next(){
+  if(busy)return;const s=SL[cur];
+  if(s.steps>1&&phase===0){clearT();const sp=splitOf(s);if(step<sp-1)snap(s,sp-1);phase=1;play(s,sp,s.steps-1,0);ui();return}
+  go(cur+1)}
+function prev(){
+  if(busy)return;const s=SL[cur];
+  if(s.steps>1&&phase===1){clearT();snap(s,splitOf(s)-1);phase=0;ui();return}
+  go(cur-1,true)}
+function replay(){
+  if(busy)return;const s=SL[cur];if(s.steps<2)return;
+  if(phase===1){clearT();snap(s,splitOf(s)-1);play(s,splitOf(s),s.steps-1,200)}else render(cur)}
 function ui(){
   const s=SL[cur],last=SL.length-1;
   prevB.disabled=cur===0;nextB.disabled=cur===last;restartB.disabled=cur===0;
@@ -546,6 +560,7 @@ addEventListener('keydown',e=>{if((e.key==='a'||e.key==='A')&&!e.metaKey&&!e.ctr
   else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev()}
   else if(e.key==='r'||e.key==='R')replay();
   else if(e.key==='Home')go(0)});
+document.addEventListener('click',e=>{if(dlg.open||e.target.closest('button,a,dialog,[data-cite]'))return;next()});
 let tx=null;addEventListener('touchstart',e=>{if(dlg.open||e.target.closest('button,a'))return;tx=[e.touches[0].clientX,e.touches[0].clientY]},{passive:true});
 addEventListener('touchend',e=>{if(!tx)return;const dx=e.changedTouches[0].clientX-tx[0],dy=e.changedTouches[0].clientY-tx[1];tx=null;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)dx<0?next():prev()},{passive:true});
 let h=0;try{h=parseInt(location.hash.slice(1),10)}catch(e){}
