@@ -2,7 +2,7 @@
 
 ## Presentazione interattiva su Piaget
 
-Apri **[Presentazione-Piaget.html](Presentazione-Piaget.html)** con un doppio clic in Chrome o Safari. Il file contiene 23 slide ed è autonomo (serve la connessione solo per aprire i link DOI). Sotto il titolo delle slide che citano un articolo c’è un’anteprima cliccabile: apre un pop-up con titolo, autori e DOI. Il discorso da leggere è nel documento «Costruire la conoscenza · Discorso su Piaget».
+Apri **[Presentazione-Piaget.html](Presentazione-Piaget.html)** con un doppio clic in Chrome o Safari. Il file contiene 24 slide ed è autonomo (serve la connessione solo per aprire i link DOI). Sotto il titolo delle slide che citano un articolo c’è un’anteprima cliccabile: apre un pop-up con titolo, autori e DOI. Il discorso da leggere è nel documento «Costruire la conoscenza · Discorso su Piaget».
 
 Comandi, in basso: **Indietro**, **Ripeti** (solo nelle slide con animazione, la fa ripartire) e **Avanti**. Le animazioni partono da sole all'apertura di ogni slide. In alto: **Ricomincia dall'inizio**.
 Da tastiera: **→ / spazio** avanti, **←** indietro, **R** ripeti, **Home** dall'inizio.
