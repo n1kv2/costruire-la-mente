@@ -2,7 +2,7 @@
 
 ## Presentazione interattiva su Piaget
 
-Apri **[Presentazione-Piaget.html](Presentazione-Piaget.html)** con un doppio clic in Chrome o Safari. Il file contiene 24 slide ed è autonomo (serve la connessione solo per aprire i link DOI). Sotto il titolo delle slide che citano un articolo c’è un’anteprima cliccabile: apre un pop-up con titolo, autori e DOI. Il discorso da leggere è nel documento «Costruire la conoscenza · Discorso su Piaget».
+Apri **[Presentazione-Piaget.html](Presentazione-Piaget.html)** con un doppio clic in Chrome o Safari. Il file contiene 26 slide, organizzate in due parti: filogenesi (la specie) e ontogenesi (l’individuo), con una piccola etichetta in alto a sinistra che indica a quale delle due ci si trova ed è autonomo (serve la connessione solo per aprire i link DOI). Sotto il titolo delle slide che citano un articolo c’è un’anteprima cliccabile: apre un pop-up con titolo, autori e DOI. Il discorso da leggere è nel documento «Costruire la conoscenza · Discorso su Piaget».
 
 Comandi, in basso: **Indietro**, **Ripeti** (solo nelle slide con animazione, la fa ripartire) e **Avanti**. Le slide con animazione si muovono in due tempi: all'apertura parte la prima parte (le informazioni di base), un clic (o Avanti, o freccia destra, o spazio) fa partire la seconda (il completamento); un altro clic passa alla slide successiva. Il clic del mouse in un punto qualsiasi dello schermo funziona come Avanti. Indietro, nella seconda parte, torna alla prima. In alto: **Ricomincia dall'inizio**.
 Da tastiera: **→ / spazio** avanti, **←** indietro, **R** ripeti, **Home** dall'inizio.

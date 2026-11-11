@@ -105,6 +105,9 @@ dialog#paper[open]::backdrop{animation:dim .4s ease}
 .instant,.instant *{transition:none!important}
 
 /* Comandi */
+.tag{position:fixed;top:30px;left:44px;z-index:5;display:flex;align-items:center;gap:12px;font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--accent);opacity:0;transition:opacity .6s ease;pointer-events:none}
+.tag::before{content:'';width:26px;height:1px;background:currentColor}
+.tag.on{opacity:1}.tag[data-k=onto]{color:var(--warm)}
 .top{position:fixed;top:0;right:0;padding:24px 32px;z-index:5}
 .bottom{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;padding:20px 32px 28px;z-index:5;pointer-events:none}
 .bottom>*{pointer-events:auto}
@@ -133,6 +136,7 @@ dialog#paper[open]::backdrop{animation:dim .4s ease}
 </head>
 <body>
 <div id="stage"></div>
+<div class="tag" id="tag" aria-hidden="true"></div>
 
 <div class="top"><button class="ctl" id="restart"><svg viewBox="0 0 24 24"><path d="M4 5v6h6"/><path d="M5.5 15a7.5 7.5 0 1 0 1.7-7.8L4 11"/></svg><span class="lbl">Ricomincia dall’inizio</span></button></div>
 <div class="bottom">
@@ -187,51 +191,31 @@ const slide=o=>SL.push(Object.assign({steps:1,apply(){}},o));
 /* 1 · Copertina */
 slide({cls:'cover',html:`<img class="cover-img" src="${IMG}" alt=""><div class="copy"><p class="kicker">Jean Piaget</p><h1>Costruire<br>la <em>conoscenza</em></h1><p class="author">Nicholas Vigo</p></div>`});
 
-/* 2 · Innato o appreso? da Platone a Baldwin */
-slide({gap:2600,steps:4,
-html:copy('Una domanda antica','Innato<br>o <em>appreso</em>?')+vis(svg(760,580,`
-<defs><clipPath id="cpR"><circle cx="460" cy="190" r="150"/></clipPath></defs>
-<style>.cL,.cR,.tl,.tr,.lbl,.lbr,#qm{transition:transform 1.5s var(--ease),opacity .9s var(--ease)}.mv .cL{transform:translateX(110px)}.mv .cR{transform:translateX(-110px)}.mv .lbl{transform:translateX(42px)}.mv .lbr{transform:translateX(-42px)}.mv .tl{transform:translateX(-72px)}.mv .tr{transform:translateX(72px)}#qm{transform-origin:380px 190px}.mv #qm{opacity:0;transform:scale(.4)}.pop{transform:scale(.6);transform-origin:380px 190px}.pop.on{transform:none}</style>
-<g id="duo">
-<g class="fade s0"><g class="cL"><circle cx="190" cy="190" r="150" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>
-<g class="tl"><text class="t-label green mid lbl" x="190" y="112">Innatismo</text><text class="t-serif mid" x="190" y="176" font-size="33">Platone</text><text class="t-serif mid" x="190" y="226" font-size="33">Cartesio</text></g></g></g>
-<g class="fade s0" style="transition-delay:.5s"><g class="cR"><circle cx="570" cy="190" r="150" fill="var(--warm-soft)" stroke="var(--warm)" stroke-width="2.5"/>
-<g class="tr"><text class="t-label warm mid lbr" x="570" y="112">Empirismo</text><text class="t-serif mid" x="570" y="176" font-size="33">Aristotele</text><text class="t-serif mid" x="570" y="226" font-size="33">Locke</text></g></g></g>
-<g class="pop fade s1"><text id="qm" class="mid" x="380" y="236" font-family="var(--serif)" font-size="130" font-style="italic" style="fill:var(--ink)">?</text></g>
-<g class="fade s2" style="transition-delay:.9s"><circle cx="300" cy="190" r="150" clip-path="url(#cpR)" fill="var(--accent)" opacity=".28"/>
-<text class="t-serif mid" x="380" y="196" font-size="34">Baldwin</text><text class="t-label mid" x="380" y="228">teoria</text></g>
-</g>
-<path class="green-stroke draw s3" pathLength="1" stroke-width="2.5" d="M380 352 L380 428"/>
-<path class="green-stroke fade s3" style="transition-delay:.7s" d="${head(380,434,0,1)}"/>
-<g class="rise s3" style="transition-delay:.4s"><text class="t-label green" x="414" y="400">metodo scientifico</text>
-<text class="mid" x="380" y="520" font-family="var(--serif)" font-size="68" font-style="italic" style="fill:var(--accent)">Piaget</text></g>`)),
-apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);on('.s3',n>=3);$('#duo').classList.toggle('mv',n>=2)}});
+/* NEW · Filogenesi e ontogenesi: arte condivisa */
+const FO=(anim)=>{
+ const branches=[['M200 470 L200 370',0],['M200 370 Q160 320 110 290',1],['M200 370 Q240 310 300 280',1],['M110 290 Q80 240 60 190',2],['M110 290 Q130 230 140 170',2],['M300 280 Q290 220 260 160',2],['M300 280 Q340 230 350 180',2],['M260 160 Q240 120 225 90',3],['M260 160 Q290 110 310 80',3]];
+ const tips=[[60,190],[140,170],[350,180],[225,90],[310,80]];
+ const dr=s=>anim?`draw ${s}`:'',fd=s=>anim?`fade ${s}`:'',st=x=>anim?` style="${x}"`:'';
+ return `<g id="gF">
+${branches.map(([d,lv])=>`<path class="green-stroke ${dr('s0')}" pathLength="1"${st(`transition-duration:.9s;transition-delay:${lv*.45}s`)} d="${d}"/>`).join('')}
+${tips.map(([x,y])=>`<circle class="${fd('s0')}"${st('transition-delay:1.7s')} cx="${x}" cy="${y}" r="7" fill="var(--accent)"/>`).join('')}
+<text class="t-serif mid green ${fd('s0')}"${st('transition-delay:.4s')} x="200" y="540">Filogenesi</text>
+<text class="t-label mid ${fd('s0')}"${st('transition-delay:.5s')} x="200" y="575">la specie</text></g>
+<g id="gO">
+<path class="warm-stroke ${dr('s1')}" pathLength="1"${st('transition-duration:2.6s')} d="${spiral(575,300,5.5,.172,3)}"/>
+<text class="t-serif mid warm ${fd('s1')}"${st('transition-delay:.6s')} x="575" y="540">Ontogenesi</text>
+<text class="t-label mid ${fd('s1')}"${st('transition-delay:.7s')} x="575" y="575">l’individuo</text></g>`};
 
-/* 3 · Piaget biologo */
-slide({gap:3600,steps:2,
-html:copy('Jean Piaget · 1896–1980','Prima di tutto,<br>un <em>biologo</em>',{chips:['malacologo','dottorato 1918','Neuchâtel']})+vis(svg(760,580,`
-<style>#orbit{transform-origin:380px 280px;animation:spin 40s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}</style>
-<path class="warm-stroke draw s0" pathLength="1" style="transition-duration:2.8s" stroke-width="4" d="${spiral(380,280,6,.19,2.75)}"/>
-<g class="fade s1"><g id="orbit"><circle cx="380" cy="280" r="235" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 12" stroke-linecap="round"/></g>
-<text class="t-label green mid" x="380" y="28">ambiente</text></g>
-<text class="t-cap mid fade s1" x="380" y="565" style="transition-delay:.4s">l’intelligenza è <tspan class="green">adattamento</tspan></text>`)),
-apply(n){on('.s0');on('.s1',n>=1)}});
+/* 2 · Filogenesi e ontogenesi: le due prospettive */
+slide({gap:[3000,3400],steps:3,
+html:copy('Come si sviluppa la conoscenza?','Filogenesi<br>e <em>ontogenesi</em>',{sub:'Due prospettive complementari sulla stessa domanda.',chips:['Tinbergen · 1963']})+vis(svg(760,600,`
+${FO(true)}
+<path class="draw s2" pathLength="1" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="1 1" d="M320 120 Q450 0 560 140"/>
+<path class="stroke fade s2" style="transition-delay:1.1s" d="${head(560,140,40,60)}"/>
+<text class="t-cap mid fade s2" x="445" y="28" style="transition-delay:.5s">adattamento</text>`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});
 
-/* 4 · Metodo clinico */
-slide({gap:2800,steps:3,
-html:copy('Parigi, 1919 · il metodo clinico','L’errore<br>è un <em>indizio</em>')+vis(svg(760,520,`
-<g class="rise s0"><text class="t-label" x="40" y="60">Risposta</text>
-<text class="t-big" id="r1" x="40" y="122">Giusta o sbagliata?</text></g>
-<line class="warm-stroke draw s1" pathLength="1" x1="32" y1="105" x2="475" y2="105"/>
-<line class="green-stroke draw s1" pathLength="1" stroke-width="2" x1="42" y1="152" x2="42" y2="196"/>
-<g class="rise s1" style="transition-delay:.45s"><text class="t-label green" x="40" y="220">Ragionamento</text>
-<text class="t-big" x="40" y="282">Quale <tspan fill="var(--accent)" font-style="italic">regola</tspan> usa?</text></g>
-<line class="green-stroke draw s2" pathLength="1" stroke-width="2" x1="42" y1="312" x2="42" y2="356"/>
-<g class="rise s2" style="transition-delay:.45s"><text class="t-label green" x="40" y="380">Nasce</text>
-<text class="t-big" x="40" y="442" font-style="italic" fill="var(--accent)" style="fill:var(--accent)">epistemologia genetica</text></g>`)),
-apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);$('#r1').classList.toggle('dim',n>=1)}});
-
-/* 5 · Laland & Seed */
+/* 3 · Laland & Seed */
 {const L=['Memoria','Linguaggio','Pianificazione','Cooperazione','Apprendimento'];
  const P=L.map((_,i)=>{const a=(-90+i*72)*Math.PI/180;return [380+190*Math.cos(a),285+190*Math.sin(a)]});
  const E=[];for(let i=0;i<5;i++)for(let j=i+1;j<5;j++)E.push([i,j]);
@@ -244,7 +228,7 @@ ${P.map(([x,y],i)=>{const anc=x<370?'end':x>390?'start':'middle',dx=x<370?-24:x>
 apply(n,inst){on('.s0');on('.s1',n>=1);$('#net5').classList.toggle('int',n>=1);
  const c=n?['nell’uomo: integrate','t-cap mid green']:['anche in altre specie','t-cap mid'];if(inst)setText('#lsCap',...c);else later(()=>setText('#lsCap',...c),n?900:1100)}});}
 
-/* 6 · Il focolare */
+/* 4 · Il focolare */
 {const person=(x,flip)=>`<g transform="translate(${x} 0) scale(${flip?-1:1} 1)"><circle cx="0" cy="318" r="24" fill="var(--ink)"/><path d="M-46 448 Q-46 360 0 356 Q38 358 44 410 L44 448Z" fill="var(--ink)"/></g>`;
 slide({gap:3200,steps:3,
 html:copy('L’origine del linguaggio · un’ipotesi','Intorno<br>al <em>fuoco</em>',{cites:['fire']})+vis(svg(760,560,`
@@ -264,7 +248,7 @@ ${person(170,false)}${person(590,true)}
 <text id="fireCap" class="t-cap mid" x="380" y="548"></text>`)),
 apply(n,inst){on('.s0');on('.s1',n>=1);on('.s2',n>=2);const c=['','',['raccontare ciò che non è presente','t-cap mid green']][n];if(c){if(inst)setText('#fireCap',...c);else later(()=>setText('#fireCap',...c),700)}else setText('#fireCap','')}});}
 
-/* 7 · Cultura cumulativa */
+/* 5 · Cultura cumulativa */
 slide({gap:2000,steps:4,
 html:copy('Il vantaggio umano','Non si riparte<br>da <em>zero</em>',{sub:'Memoria, linguaggio, cultura cumulativa.',cites:['stout','legare']})+vis(svg(760,560,`
 ${[0,1,2,3].map(g=>`<g class="rise gen" data-i="${g}">${Array.from({length:g+1},(_,j)=>`<rect x="${90+g*160}" y="${420-j*62}" width="100" height="54" rx="6" fill="${j===g?'var(--accent)':'var(--accent-soft)'}" stroke="var(--accent)" stroke-width="1.5"/>`).join('')}<text class="t-label mid" x="${140+g*160}" y="510">${g+1}ª gen.</text></g>`).join('')}
@@ -273,7 +257,7 @@ ${[0,1,2,3].map(g=>`<g class="rise gen" data-i="${g}">${Array.from({length:g+1},
 <text class="t-cap mid green fade s3" x="380" y="130" style="transition-delay:.6s">ogni generazione parte da quella prima</text>`)),
 apply(n){$$('.gen').forEach(g=>g.classList.toggle('on',+g.dataset.i<=n));on('.s3',n>=3)}});
 
-/* 8 · Vie dorsale e ventrale */
+/* 6 · Vie dorsale e ventrale */
 slide({gap:3000,steps:3,
 html:copy('Stout & Hecht · il cervello che impara','Vedere <em>cosa</em>,<br>sapere <em>come</em>',{cites:['stout']})+vis(svg(760,600,`
 <g transform="translate(-30 22) scale(1.55)"><path class="stroke draw s0" pathLength="1" stroke-width="1.7" style="transition-duration:2s" d="${BRAIN}"/><path class="hair fade s0" stroke-width="1" style="transition-delay:1.2s" d="${SULCI}"/>
@@ -287,7 +271,7 @@ html:copy('Stout & Hecht · il cervello che impara','Vedere <em>cosa</em>,<br>sa
 <g class="fade s2" style="transition-delay:.5s"><text class="t-serif mid green" x="420" y="60" font-size="30">via dorsale · <tspan font-style="italic">come</tspan></text></g>`)),
 apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});
 
-/* 9 · Curriculum a elica */
+/* 7 · Curriculum a elica */
 {let d='';const pt=t=>[380+210*Math.cos(t),470-16*t-46*Math.sin(t)];for(let t=0;t<=6*Math.PI+.01;t+=.06){const[x,y]=pt(t);d+=(d?' L':'M')+x.toFixed(1)+' '+y.toFixed(1)}
  const lab=[[0,'osservare','start',24],[Math.PI,'praticare','end',-24],[2*Math.PI,'interagire','start',24]];
 slide({gap:4000,steps:2,
@@ -298,40 +282,84 @@ ${(()=>{const[x,y]=pt(6*Math.PI);return `<g class="rise s1"><circle cx="${x}" cy
 <text class="t-label mid fade s1" x="380" y="560" style="transition-delay:.5s">ogni giro torna allo stesso punto, più in alto</text>`)),
 apply(n){on('.s0');on('.s1',n>=1)}});}
 
-/* 10 · Filogenesi e ontogenesi */
-{const branches=[['M200 470 L200 370',0],['M200 370 Q160 320 110 290',1],['M200 370 Q240 310 300 280',1],['M110 290 Q80 240 60 190',2],['M110 290 Q130 230 140 170',2],['M300 280 Q290 220 260 160',2],['M300 280 Q340 230 350 180',2],['M260 160 Q240 120 225 90',3],['M260 160 Q290 110 310 80',3]];
- const tips=[[60,190],[140,170],[350,180],[225,90],[310,80]];
-slide({gap:[3000,3400],steps:3,
-html:copy('Ritorno a Piaget','La specie<br>e <em>l’individuo</em>',{sub:'Linguaggio e cultura ampliano l’adattamento.'})+vis(svg(760,600,`
-${branches.map(([d,lv])=>`<path class="green-stroke draw s0" pathLength="1" style="transition-duration:.9s;transition-delay:${lv*.45}s" d="${d}"/>`).join('')}
-${tips.map(([x,y])=>`<circle class="fade s0" style="transition-delay:1.7s" cx="${x}" cy="${y}" r="7" fill="var(--accent)"/>`).join('')}
-<text class="t-serif mid fade s0" x="200" y="540" style="transition-delay:.4s">Filogenesi</text>
-<text class="t-label mid fade s0" x="200" y="575" style="transition-delay:.5s">la specie</text>
-<path class="warm-stroke draw s1" pathLength="1" style="transition-duration:2.6s" d="${spiral(575,300,5.5,.172,3)}"/>
-<text class="t-serif mid fade s1" x="575" y="540" style="transition-delay:.6s">Ontogenesi</text>
-<text class="t-label mid fade s1" x="575" y="575" style="transition-delay:.7s">l’individuo</text>
-<path class="draw s2" pathLength="1" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="1 1" d="M320 120 Q450 0 560 140"/>
-<path class="stroke fade s2" style="transition-delay:1.1s" d="${head(560,140,40,60)}"/>
-<text class="t-cap mid fade s2" x="445" y="28" style="transition-delay:.5s">adattamento</text>`)),
-apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});}
+/* 8 · Ritorno: dalla specie all’individuo */
+slide({gap:2800,steps:2,
+html:copy('Ritorno al punto di partenza','Dalla specie<br>all’<em>individuo</em>',{sub:'Il filo comune: organismo, ambiente, adattamento.'})+vis(svg(760,600,`
+<style>#gF,#gO{transition:opacity 1.4s var(--ease),transform 1.4s var(--ease)}#gO{transform-origin:575px 340px}.dimF #gF{opacity:.08}.dimF #gO{transform:scale(1.1)}</style>
+<g id="fo">${FO(false)}</g>
+<text id="foCap" class="t-cap mid" x="380" y="28"></text>`)),
+apply(n,inst){$('#fo').classList.toggle('dimF',n>=1);
+  const c=n?['…all’individuo','t-cap mid warm']:['dalla specie…','t-cap mid green'];
+  if(inst){setText('#foCap',...c);setTag(n?'onto':'');return}
+  if(n===0){setText('#foCap',...c);setTag('')}
+  else{setText('#foCap',...c);later(()=>setTag('onto'),1500)}}});
 
-/* 11 · Costruttivismo */
+/* 9 · Innato o appreso? da Platone a Baldwin */
+slide({gap:2600,steps:4,
+html:copy('Una domanda antica','Innato<br>o <em>appreso</em>?')+vis(svg(760,580,`
+<defs><clipPath id="cpR"><circle cx="460" cy="190" r="150"/></clipPath></defs>
+<style>.cL,.cR,.tl,.tr,.lbl,.lbr,#qm{transition:transform 1.5s var(--ease),opacity .9s var(--ease)}.mv .cL{transform:translateX(110px)}.mv .cR{transform:translateX(-110px)}.mv .lbl{transform:translateX(42px)}.mv .lbr{transform:translateX(-42px)}.mv .tl{transform:translateX(-72px)}.mv .tr{transform:translateX(72px)}#qm{transform-origin:380px 190px}.mv #qm{opacity:0;transform:scale(.4)}.pop{transform:scale(.6);transform-origin:380px 190px}.pop.on{transform:none}</style>
+<g id="duo">
+<g class="fade s0"><g class="cL"><circle cx="190" cy="190" r="150" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>
+<g class="tl"><text class="t-label green mid lbl" x="190" y="112">Innatismo</text><text class="t-serif mid" x="190" y="176" font-size="33">Platone</text><text class="t-serif mid" x="190" y="226" font-size="33">Cartesio</text></g></g></g>
+<g class="fade s0" style="transition-delay:.5s"><g class="cR"><circle cx="570" cy="190" r="150" fill="var(--warm-soft)" stroke="var(--warm)" stroke-width="2.5"/>
+<g class="tr"><text class="t-label warm mid lbr" x="570" y="112">Empirismo</text><text class="t-serif mid" x="570" y="176" font-size="33">Aristotele</text><text class="t-serif mid" x="570" y="226" font-size="33">Locke</text></g></g></g>
+<g class="pop fade s1"><text id="qm" class="mid" x="380" y="236" font-family="var(--serif)" font-size="130" font-style="italic" style="fill:var(--ink)">?</text></g>
+<g class="fade s2" style="transition-delay:.9s"><circle cx="300" cy="190" r="150" clip-path="url(#cpR)" fill="var(--accent)" opacity=".28"/>
+<text class="t-serif mid" x="380" y="196" font-size="34">Baldwin</text><text class="t-label mid" x="380" y="228">teoria</text></g>
+</g>
+<path class="green-stroke draw s3" pathLength="1" stroke-width="2.5" d="M380 352 L380 428"/>
+<path class="green-stroke fade s3" style="transition-delay:.7s" d="${head(380,434,0,1)}"/>
+<g class="rise s3" style="transition-delay:.4s"><text class="t-label green" x="414" y="400">metodo scientifico</text>
+<text class="mid" x="380" y="520" font-family="var(--serif)" font-size="68" font-style="italic" style="fill:var(--accent)">Piaget</text></g>`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);on('.s3',n>=3);$('#duo').classList.toggle('mv',n>=2)}});
+
+/* 10 · Piaget biologo */
+slide({gap:3600,steps:2,
+html:copy('Jean Piaget · 1896–1980','Prima di tutto,<br>un <em>biologo</em>',{chips:['malacologo','dottorato 1918','Neuchâtel']})+vis(svg(760,580,`
+<style>#orbit{transform-origin:380px 280px;animation:spin 40s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}</style>
+<path class="warm-stroke draw s0" pathLength="1" style="transition-duration:2.8s" stroke-width="4" d="${spiral(380,280,6,.19,2.75)}"/>
+<g class="fade s1"><g id="orbit"><circle cx="380" cy="280" r="235" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 12" stroke-linecap="round"/></g>
+<text class="t-label green mid" x="380" y="28">ambiente</text></g>
+<text class="t-cap mid fade s1" x="380" y="565" style="transition-delay:.4s">l’intelligenza è <tspan class="green">adattamento</tspan></text>`)),
+apply(n){on('.s0');on('.s1',n>=1)}});
+
+/* 11 · Metodo clinico */
 slide({gap:2800,steps:3,
-html:copy('Il costruttivismo','Conoscere<br>è <em>costruire</em>',{sub:'Né solo geni, né solo esperienza.'})+vis(svg(760,580,`
-<style>.ring{fill:transparent;stroke:var(--ink);stroke-width:2;transition:stroke-dashoffset 1.6s var(--ease),fill 1.2s ease}.ring.tint{fill:var(--accent-soft);stroke:var(--accent)}</style>
-<circle class="ring draw s0" pathLength="1" cx="230" cy="290" r="128"/>
-<circle class="ring draw s0" pathLength="1" cx="530" cy="290" r="128" style="transition-delay:.2s"/>
-<text class="t-serif mid fade s0" x="230" y="300" style="transition-delay:.6s">Organismo</text>
-<text class="t-serif mid fade s0" x="530" y="300" style="transition-delay:.75s">Ambiente</text>
-<path class="green-stroke draw s1" pathLength="1" d="M262 160 C330 52 430 52 498 160"/>
-<path class="green-stroke fade s1" style="transition-delay:.9s" d="${head(498,160,68,108)}"/>
-<text class="t-label green mid fade s1" x="380" y="42" style="transition-delay:.4s">agisce</text>
-<path class="green-stroke draw s2" pathLength="1" d="M498 420 C430 528 330 528 262 420"/>
-<path class="green-stroke fade s2" style="transition-delay:.9s" d="${head(262,420,-68,-108)}"/>
-<text class="t-label green mid fade s2" x="380" y="566" style="transition-delay:.4s">si trasforma</text>`)),
-apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);$$('.ring').forEach(r=>r.classList.toggle('tint',n>=2))}});
+html:copy('Parigi, 1919 · il metodo clinico','L’errore<br>è un <em>indizio</em>')+vis(svg(760,520,`
+<g class="rise s0"><text class="t-label" x="40" y="60">Risposta</text>
+<text class="t-big" id="r1" x="40" y="122">Giusta o sbagliata?</text></g>
+<line class="warm-stroke draw s1" pathLength="1" x1="32" y1="105" x2="475" y2="105"/>
+<line class="green-stroke draw s1" pathLength="1" stroke-width="2" x1="42" y1="152" x2="42" y2="196"/>
+<g class="rise s1" style="transition-delay:.45s"><text class="t-label green" x="40" y="220">Ragionamento</text>
+<text class="t-big" x="40" y="282">Quale <tspan fill="var(--accent)" font-style="italic">regola</tspan> usa?</text></g>
+<line class="green-stroke draw s2" pathLength="1" stroke-width="2" x1="42" y1="312" x2="42" y2="356"/>
+<g class="rise s2" style="transition-delay:.45s"><text class="t-label green" x="40" y="380">Nasce</text>
+<text class="t-big" x="40" y="442" font-style="italic" fill="var(--accent)" style="fill:var(--accent)">epistemologia genetica</text></g>`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);$('#r1').classList.toggle('dim',n>=1)}});
 
-/* 12 · Assimilazione e accomodamento */
+/* 12 · Costruttivismo */
+slide({gap:2800,steps:4,
+html:copy('Piaget · il costruttivismo','Conoscere<br>è <em>costruire</em>',{sub:'Una costruzione attiva, su basi biologiche innate.'})+vis(svg(760,650,`
+<style>.ring{fill:transparent;stroke:var(--ink);stroke-width:2;transition:stroke-dashoffset 1.6s var(--ease),fill 1.2s ease}.ring.tint{fill:var(--accent-soft);stroke:var(--accent)}</style>
+<circle class="ring draw s0" pathLength="1" cx="230" cy="230" r="118"/>
+<circle class="ring draw s0" pathLength="1" cx="530" cy="230" r="118" style="transition-delay:.2s"/>
+<text class="t-serif mid fade s0" x="230" y="232" style="transition-delay:.6s">Organismo</text>
+<text class="t-label mid fade s0" x="230" y="268" style="transition-delay:.75s">strutture innate</text>
+<text class="t-serif mid fade s0" x="530" y="232" style="transition-delay:.75s">Ambiente</text>
+<text class="t-label mid fade s0" x="530" y="268" style="transition-delay:.9s">esperienza</text>
+<path class="green-stroke draw s1" pathLength="1" d="M262 122 C330 24 430 24 498 122"/>
+<path class="green-stroke fade s1" style="transition-delay:.9s" d="${head(498,122,68,98)}"/>
+<text class="t-label green mid fade s1" x="380" y="26" style="transition-delay:.4s">agisce</text>
+<path class="green-stroke draw s2" pathLength="1" d="M498 338 C430 436 330 436 262 338"/>
+<path class="green-stroke fade s2" style="transition-delay:.9s" d="${head(262,338,-68,-98)}"/>
+<text class="t-label green mid fade s2" x="380" y="466" style="transition-delay:.4s">si trasforma</text>
+<line class="hair fade s3" x1="60" y1="505" x2="700" y2="505"/>
+<text class="t-label mid fade s3" x="380" y="540">quattro meccanismi</text>
+${[['assimilazione',210,590],['accomodamento',550,590],['organizzazione',210,636],['equilibrazione',550,636]].map(([t,x,y],i)=>`<text class="t-serif mid green rise s3" style="transition-delay:${.2+i*.15}s;font-style:italic" font-size="28" x="${x}" y="${y}">${t}</text>`).join('')}`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2);on('.s3',n>=3);$$('.ring').forEach(r=>r.classList.toggle('tint',n>=2))}});
+
+/* 13 · Assimilazione e accomodamento */
 {const pos=['translate(0px,0px)','translate(-188px,0px)','translate(-60px,0px) rotate(90deg)','translate(-400px,0px) rotate(90deg)'];
  const lab=[['Assimilazione','t-serif mid'],['Non passa…','t-serif mid warm'],['Accomodamento','t-serif mid green'],['Adattamento','t-serif mid green']];
 slide({gap:2600,steps:4,
@@ -343,10 +371,10 @@ ${Array.from({length:8},(_,i)=>`<circle cx="380" cy="${70+i*54}" r="9" fill="var
 <text id="adLab" class="t-serif mid" x="380" y="540" font-size="38">Assimilazione</text>`)),
 apply(n,instant){const st=$('#stick');st.style.transform=pos[n];st.classList.toggle('bump',n===1&&!instant);setText('#adLab',...lab[n])}});}
 
-/* 13 · Equilibrazione */
+/* 14 · Equilibrazione */
 {const lab=[['Equilibrio','t-cap mid'],['Disequilibrio','t-cap mid warm'],['Nuovo equilibrio','t-cap mid green']];
 slide({gap:3000,steps:3,
-html:copy('Il motore del cambiamento','L’<em>equilibrazione</em>',{chips:['conflitto cognitivo','autoregolazione']})+vis(svg(760,580,`
+html:copy('Il motore del cambiamento','L’<em>equilibrazione</em>',{chips:['organizzazione','conflitto cognitivo','autoregolazione']})+vis(svg(760,580,`
 <style>#beam{transform-origin:380px 400px;transition:transform 1.2s var(--spring)}.blk{transition:transform .7s cubic-bezier(.5,0,.75,0),opacity .3s}.blk:not(.on){transform:translateY(-320px);opacity:0}</style>
 <line x1="80" y1="470" x2="680" y2="470" class="hair"/>
 <path d="M380 404 L336 470 L424 470Z" fill="var(--ink)"/>
@@ -361,7 +389,20 @@ apply(n,instant){const beam=$('#beam'),tilt=n===1?'rotate(9deg)':'rotate(0deg)';
   if(instant||n===0){beam.style.transform=tilt;setText('#eqLab',...lab[n]);return}
   later(()=>{beam.style.transform=tilt;setText('#eqLab',...lab[n])},650)}});}
 
-/* 14 · Gli stadi */
+/* 15 · Continuità e discontinuità */
+{const X=[122,287,452,617],Y=[340,280,220,160],ages=['0–2','2–7','7–11','11+'];
+slide({gap:[3000,3200],steps:3,
+html:copy('Piaget · lo sviluppo','Continuità<br>e <em>discontinuità</em>',{sub:'Una sola linea di sviluppo, quattro modi di pensare.'})+vis(svg(760,570,`
+<path class="green-stroke draw s0" pathLength="1" stroke-width="5" style="transition-duration:2s" d="M40 430 L720 430"/>
+<g class="fade s0" style="transition-delay:.8s"><text class="t-serif green" x="40" y="480" font-size="34">continuità</text><text class="t-label" x="40" y="510">funzioni invarianti</text></g>
+<path class="warm-stroke draw s1" pathLength="1" stroke-width="4" style="transition-duration:2.2s" d="M40 340 H205 V280 H370 V220 H535 V160 H700"/>
+${X.map((x,i)=>`<g class="fade s1" style="transition-delay:${.4+i*.45}s"><text class="t-label mid warm" x="${x}" y="${Y[i]-16}">${ages[i]}</text></g>`).join('')}
+<g class="fade s1" style="transition-delay:1.4s"><text class="t-serif warm" x="40" y="70" font-size="34">discontinuità</text><text class="t-label" x="40" y="100">gli stadi, uno dopo l’altro</text></g>
+${X.map((x,i)=>`<line class="fade s2" style="transition-delay:${i*.2}s" x1="${x}" y1="${Y[i]+12}" x2="${x}" y2="420" stroke="var(--accent)" stroke-width="2" stroke-dasharray="3 8" stroke-linecap="round"/>`).join('')}
+<text class="t-cap mid green fade s2" x="380" y="558" style="transition-delay:.6s">cambiano le strutture, restano le funzioni</text>`)),
+apply(n){on('.s0');on('.s1',n>=1);on('.s2',n>=2)}});}
+
+/* 16 · Gli stadi */
 {const st=[['0–2 anni','Sensomotorio','','agire'],['2–7 anni','Preoperatorio','','rappresentare'],['7–11 anni','Operatorio','concreto','coordinare'],['11+ anni','Operatorio','formale','ipotizzare']];
 slide({gap:1800,steps:4,
 html:copy('La teoria stadiale','Quattro<br><em>stadi</em>',{sub:'Sequenza invariante: ogni stadio integra il precedente.'})+vis(svg(760,560,st.map(([age,a,b,verb],i)=>{const x=6+i*188,top=380-i*100;return `<g class="rise st" data-i="${i}">
@@ -372,7 +413,7 @@ html:copy('La teoria stadiale','Quattro<br><em>stadi</em>',{sub:'Sequenza invari
 <text class="t-cap green" x="${x+2}" y="${top-20}" font-size="28">${verb}</text></g>`}).join(''))),
 apply(n){$$('.fit').forEach(e=>{if(e.getComputedTextLength()>158)e.setAttribute('textLength',158)});$$('.st').forEach(g=>g.classList.toggle('on',+g.dataset.i<=n))}});}
 
-/* 15 · Sensomotorio: permanenza dell'oggetto */
+/* 17 · Sensomotorio: permanenza dell'oggetto */
 {const caps=[['Nascosto in A','t-cap mid'],['Spostato in B','t-cap mid'],['…ma lo cerca in A','t-cap mid warm'],['Contano memoria e inibizione','t-cap mid green']];
  const cup=(id,x,l)=>`<g transform="translate(${x} 0)"><g class="cup" id="${id}"><path d="M-82 400 L-68 276 Q0 234 68 276 L82 400Z" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/></g><text class="t-serif mid" x="0" y="456" style="fill:var(--muted)">${l}</text></g>`;
  const up=(id,b)=>$('#'+id).classList.toggle('up',b);
@@ -392,7 +433,7 @@ apply(n,instant){on('.s2',n>=2);const ball=$('#ball');
   if(n===2){later(()=>setText('#objCap',...caps[2]),900)}
   if(n===3){up('cupB',true);later(()=>setText('#objCap',...caps[3]),600)}}});}
 
-/* 16 · Preoperatorio: funzione simbolica */
+/* 18 · Preoperatorio: funzione simbolica */
 slide({gap:2800,steps:2,
 html:copy('Stadio 2 · 2–7 anni','Il periodo<br><em>preoperatorio</em>',{chips:['funzione simbolica','gioco simbolico','irreversibilità']})+vis(svg(760,480,`
 <style>#wood{transition:opacity 1s ease}#wood.ghost{opacity:.12}#plane{opacity:0;transform:translateY(20px) rotate(4deg);transform-origin:380px 220px;transition:opacity 1s ease,transform 1.4s var(--ease)}#plane.on{opacity:1;transform:translateY(-14px) rotate(-6deg)}#plane.on>g{animation:float 3.5s ease-in-out 1.4s infinite}@keyframes float{50%{transform:translateY(-10px)}}</style>
@@ -401,7 +442,7 @@ html:copy('Stadio 2 · 2–7 anni','Il periodo<br><em>preoperatorio</em>',{chips
 <text id="symLab" class="t-cap mid" x="380" y="440">un pezzo di legno</text>`)),
 apply(n){$('#wood').classList.toggle('ghost',n>=1);$('#plane').classList.toggle('on',n>=1);setText('#symLab',n?'…diventa un aereo':'un pezzo di legno',n?'t-cap mid green':'t-cap mid')}});
 
-/* 17 · Operatorio concreto: conservazione */
+/* 19 · Operatorio concreto: conservazione */
 {const AREA=136*118;let p=0;
  function draw(v){p=v;const w=140-72*v,h=AREA/(w-4),x=550-w/2;const wr=$('#wr'),gr=$('#gr2');if(!wr)return;wr.setAttribute('x',x+2);wr.setAttribute('width',w-4);wr.setAttribute('y',418-h);wr.setAttribute('height',h);gr.setAttribute('d',`M${x} ${418-h-60} L${x} 420 L${x+w} 420 L${x+w} ${418-h-60}`)}
  function tween(to){const from=p;let t0;const f=t=>{if(!$('#wr'))return;t0??=t;const k=Math.min(1,(t-t0)/1600),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;draw(from+(to-from)*e);if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
@@ -423,7 +464,7 @@ apply(n,instant){if(instant)draw(n>=1?1:0);else if(n===1)tween(1);else draw(n>=1
   const c=[['',''],['più alto… più liquido?','t-cap mid warm'],['stessa quantità','t-cap mid green']][n];
   if(instant||n===0)setText('#conCap',...c);else later(()=>setText('#conCap',...c),n===1?1500:900)}});}
 
-/* 18 · Operatorio formale: i dadi */
+/* 20 · Operatorio formale: i dadi */
 {let cells='';for(let a=1;a<=6;a++)for(let b=1;b<=6;b++)cells+=`<div class="dc" data-s="${a+b}" style="transition-delay:${(a-1+b-1)*40}ms">${a}+${b}</div>`;
 slide({gap:2800,steps:3,
 html:copy('Stadio 4 · dagli 11 anni','Il periodo<br><em>operatorio formale</em>',{chips:['ipotetico-deduttivo','il possibile','gruppo INRC']})+vis(`
@@ -431,7 +472,7 @@ html:copy('Stadio 4 · dagli 11 anni','Il periodo<br><em>operatorio formale</em>
 <div class="dwrap"><p class="dq">Due dadi: esce più spesso 2 o 7?</p><div class="dice"><div class="dgrid">${cells}</div><div class="res"><div id="r2"><span>somma 2</span><b style="color:var(--warm)">1/36</b></div><div id="r7"><span>somma 7</span><b style="color:var(--accent)">6/36</b></div></div></div></div>`),
 apply(n){$$('.dc').forEach(c=>{c.classList.toggle('two',n>=1&&c.dataset.s==='2');c.classList.toggle('seven',n>=2&&c.dataset.s==='7')});$('#r2').classList.toggle('on',n>=1);$('#r7').classList.toggle('on',n>=2)}});}
 
-/* 19 · Limiti: décalage */
+/* 21 · Limiti: décalage */
 {const rows=[['Quantità',150,330],['Peso',290,520],['Volume',420,680]];
 slide({gap:2000,steps:3,
 html:copy('I limiti · 1','Non tutto<br><em>insieme</em>',{chips:['asincronie','décalage orizzontali'],cites:['newcombe']})+vis(svg(760,460,`
@@ -444,7 +485,7 @@ ${rows.map(([t,a,b],i)=>{const y=90+i*100;return `<text class="t-serif" x="0" y=
 <text class="t-cap mid green fade s2" x="430" y="450" style="transition-delay:.9s">stessa logica, età diverse</text>`)),
 apply(n){$$('.bar').forEach(e=>e.classList.toggle('on',+e.dataset.i<=n));on('.s2',n>=2)}});}
 
-/* 20 · Limiti: struttura unica */
+/* 22 · Limiti: struttura unica */
 {const D=[['linguaggio',220,170],['numero',540,170],['spazio',220,370],['oggetti',540,370]];
 slide({gap:3000,steps:2,
 html:copy('I limiti · 2','Una mente,<br><em>tante strutture</em>',{chips:['struttura unitaria','dominio-generale','analogie col comportamentismo']})+vis(svg(760,540,`
@@ -455,7 +496,7 @@ ${D.map(([t,x,y],i)=>`<g class="dom" style="transform:translate(${380-x}px,${270
 apply(n,inst){$('#one').classList.toggle('split',n>=1);$$('.dom').forEach(g=>{g.classList.toggle('on',n>=1);g.style.transform=n>=1?'none':`translate(${g.dataset.x}px,${g.dataset.y}px)`});
  const c=n?['dominio-specifica','t-cap mid green']:['Piaget: dominio-generale','t-cap mid'];if(inst||!n)setText('#limCap',...c);else later(()=>setText('#limCap',...c),700)}});}
 
-/* 21 · Crone & Ridderinkhof */
+/* 23 · Crone & Ridderinkhof */
 {const caps=[['Corteccia prefrontale','pianificazione · inibizione · memoria di lavoro'],['Ippocampo','memoria episodica e spaziale'],['Reti del linguaggio','Broca · Wernicke']];
 slide({gap:[3200,3000],steps:3,
 html:copy('Le neuroscienze dello sviluppo','Dalla teoria<br>al <em>cervello</em>',{cites:['crone']})+vis(svg(760,620,`
@@ -471,26 +512,25 @@ html:copy('Le neuroscienze dello sviluppo','Dalla teoria<br>al <em>cervello</em>
 apply(n,inst){on('.s0');on('.s2',n>=2);$$('.reg').forEach(r=>{const i=+r.dataset.i;r.classList.toggle('on',i<=n);r.classList.toggle('cur',i===n)});
  const go=()=>{setText('#crT',caps[n][0]);setText('#crS',caps[n][1])};if(inst)go();else later(go,n?300:1500)}});}
 
-/* 22 · Plasticità */
+/* 24 · Potatura sinaptica */
 {const P=[[95,200],[180,95],[205,320],[300,165],[345,305],[435,80],[495,230],[395,200]].map(([x,y])=>[x*1.25+5,y*1.25+20]);
- const E=[[0,1],[0,2],[0,3],[1,3],[1,5],[2,3],[2,4],[3,4],[3,5],[3,7],[4,6],[4,7],[5,6],[5,7],[6,7]],strong=new Set([1,4,6,9,10,13]);
-slide({gap:3000,steps:2,
-html:copy('Neurocostruttivismo','L’esperienza<br><em>riorganizza</em>',{sub:'Le connessioni cambiano con l’uso.'})+vis(svg(760,540,`
-<style>.ed{fill:none;stroke:#b9b1a5;stroke-width:2;transition:stroke-dashoffset 1s var(--ease),stroke .9s,stroke-width .9s,opacity .9s}.net.re .ed.w{opacity:.15}.net.re .ed.s{stroke:var(--accent);stroke-width:6}.sig{fill:none;stroke:var(--warm);stroke-width:3;stroke-dasharray:6 22;opacity:0;transition:opacity .8s}.net.re .sig{opacity:.9;animation:sig 1.6s linear infinite}@keyframes sig{to{stroke-dashoffset:-56}}.nd{fill:var(--paper);stroke:var(--ink);stroke-width:2.5;transition:fill .8s}.net.re .nd{fill:var(--accent-soft)}</style>
+ const strong=new Set(['0-3','1-3','3-5','3-4','2-4','4-6','5-6','3-7']),E=[];for(let i=0;i<8;i++)for(let j=i+1;j<8;j++)E.push([i,j]);
+slide({gap:3200,steps:2,
+html:copy('Neurocostruttivismo','La potatura<br><em>sinaptica</em>',{sub:'L’esperienza sfoltisce le connessioni: restano quelle usate.'})+vis(svg(760,540,`
+<style>.ed{fill:none;stroke:#c9c1b4;stroke-width:1.8;transition:stroke .9s,stroke-width .9s,opacity 1.1s}.net.re .ed.w{opacity:0}.net.re .ed.s{stroke:var(--accent);stroke-width:6}.sig{fill:none;stroke:var(--warm);stroke-width:3;stroke-dasharray:6 22;opacity:0;transition:opacity .8s}.net.re .sig{opacity:.9;animation:sig 1.6s linear infinite}@keyframes sig{to{stroke-dashoffset:-56}}.nd{fill:var(--paper);stroke:var(--ink);stroke-width:2.5;transition:fill .8s}.net.re .nd{fill:var(--accent-soft)}</style>
 <g class="net" id="net">
-${E.map(([a,b],i)=>`<path class="ed draw s0 ${strong.has(i)?'s':'w'}" pathLength="1" style="transition-delay:${i*45}ms" d="M${P[a]} L${P[b]}"/>`).join('')}
-<path class="green-stroke draw s1" pathLength="1" stroke-width="6" style="transition-delay:.5s" d="M${P[2]} Q${(P[2][0]+P[6][0])/2} ${P[2][1]+60} ${P[6]}"/>
-${E.map(([a,b],i)=>strong.has(i)?`<path class="sig" d="M${P[a]} L${P[b]}"/>`:'').join('')}
+${E.map(([a,b],i)=>`<path class="ed draw s0 ${strong.has(a+'-'+b)?'s':'w'}" pathLength="1" style="transition-delay:${i*35}ms" d="M${P[a]} L${P[b]}"/>`).join('')}
+${E.map(([a,b])=>strong.has(a+'-'+b)?`<path class="sig" d="M${P[a]} L${P[b]}"/>`:'').join('')}
 ${P.map(([x,y],i)=>`<circle class="nd fade s0" style="transition-delay:${200+i*60}ms" cx="${x}" cy="${y}" r="13"/>`).join('')}</g>
 <text id="plCap" class="t-cap mid green" x="380" y="525"></text>`)),
-apply(n){on('.s0');on('.s1',n>=1);$('#net').classList.toggle('re',n>=1);setText('#plCap',n?'plasticità':'')}});}
+apply(n,inst){on('.s0');$('#net').classList.toggle('re',n>=1);const c=n?['usate: rafforzate · non usate: eliminate','t-cap mid green']:['all’inizio, moltissime connessioni','t-cap mid'];if(inst)setText('#plCap',...c);else later(()=>setText('#plCap',...c),n?900:1400)}});}
 
-/* 23 · Chiusura */
+/* 25 · Chiusura */
 slide({gap:1600,steps:4,cls:'final',
 html:`<div class="copy"><p class="kicker">In sintesi</p><h2>Come si costruisce<br>la <em>conoscenza?</em></h2><div class="levels">${[['evoluzione','Specie'],['Piaget','Individuo'],['neuroscienze','Cervello']].map(([a,b],i)=>`<div class="lvl" data-i="${i}"><span>${a}</span><b>${b}</b></div>`).join('')}</div></div>`,
 apply(n){$$('.lvl').forEach(l=>l.classList.toggle('on',+l.dataset.i<n))}});
 
-/* 24 · QR code articoli */
+/* 26 · QR code articoli */
 slide({gap:1800,steps:2,
 html:copy('Per approfondire','Gli articoli<br>sul tuo <em>telefono</em>',{sub:'Inquadra il codice: sintesi degli abstract, traduzione e legame con Piaget.'})+vis(svg(760,600,`
 <style>.qrc{transform-origin:380px 280px}#scan{opacity:0}.on #scan,#scan.on{opacity:1;animation:scan 2.6s ease-in-out infinite}@keyframes scan{0%,100%{transform:translateY(0)}50%{transform:translateY(330px)}}</style>
@@ -500,6 +540,9 @@ html:copy('Per approfondire','Gli articoli<br>sul tuo <em>telefono</em>',{sub:'I
 <text class="t-label mid green fade s1" x="380" y="520">n1kv2.github.io/costruire-la-mente/articoli.html</text>`)),
 apply(n){on('.s0');on('.s1',n>=1)}});
 
+/* tag filogenesi/ontogenesi */
+SL.forEach((s,i)=>{s.tag=(i>=2&&i<=6)?'filo':(i>=8&&i<=23)?'onto':''});
+
 /* ---------- Pop-up articoli ---------- */
 const dlg=byId('paper');
 function openPaper(k){const p=PAPERS[k];if(!p)return;byId('pJournal').textContent=p.j;byId('pTitle').textContent=p.t;byId('pAuthors').textContent=p.a+' ('+p.y+')';const a=byId('pDoi');a.href='https://doi.org/'+p.doi;a.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>doi.org/'+p.doi;try{dlg.showModal()}catch(e){dlg.setAttribute('open','')}}
@@ -508,6 +551,9 @@ byId('pClose').onclick=()=>{dlg.close();citeIdx=-1};
 dlg.addEventListener('click',e=>{if(e.target===dlg){dlg.close();citeIdx=-1}});
 
 /* ---------- Motore ---------- */
+const tagEl=byId('tag');let tagK='';
+const TAGS={filo:'Filogenesi',onto:'Ontogenesi'};
+function setTag(k){if(k===tagK)return;tagK=k;if(!k){tagEl.classList.remove('on');return}tagEl.textContent=TAGS[k];tagEl.dataset.k=k;tagEl.classList.add('on')}
 let cur=0,step=0,busy=false;
 const prevB=byId('prev'),nextB=byId('next'),replayB=byId('replay'),restartB=byId('restart');
 function fit(){const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
@@ -520,7 +566,7 @@ function play(s,from,to,first){let at=first;for(let k=from;k<=to;k++){if(k>from)
 function snap(s,k){const el=stage.firstElementChild;el.classList.add('instant');step=k;s.apply(k,true);void el.offsetWidth;el.classList.remove('instant')}
 function render(i,atEnd=false){
   clearT();citeIdx=-1;if(dlg.open)dlg.close();
-  const s=SL[i];cur=i;step=atEnd?s.steps-1:0;phase=(atEnd&&s.steps>1)?1:0;
+  const s=SL[i];cur=i;setTag(s.tag||'');step=atEnd?s.steps-1:0;phase=(atEnd&&s.steps>1)?1:0;
   stage.innerHTML=`<section class="slide ${s.cls||''}">${s.html}</section>`;
   const el=stage.firstElementChild;
   if(atEnd){el.classList.add('instant');s.apply(step,true);void el.offsetWidth;el.classList.remove('instant')}
