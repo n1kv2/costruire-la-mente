@@ -342,10 +342,8 @@ html:copy('Piaget · il costruttivismo','Conoscere<br>è <em>costruire</em>',{su
 <style>.ring{fill:transparent;stroke:var(--ink);stroke-width:2;transition:stroke-dashoffset 1.6s var(--ease),fill 1.2s ease}.ring.tint{fill:var(--accent-soft);stroke:var(--accent)}</style>
 <circle class="ring draw s0" pathLength="1" cx="230" cy="230" r="118"/>
 <circle class="ring draw s0" pathLength="1" cx="530" cy="230" r="118" style="transition-delay:.2s"/>
-<text class="t-serif mid fade s0" x="230" y="232" style="transition-delay:.6s">Organismo</text>
-<text class="t-label mid fade s0" x="230" y="268" style="transition-delay:.75s">dotazione biologica</text>
-<text class="t-serif mid fade s0" x="530" y="232" style="transition-delay:.75s">Ambiente</text>
-<text class="t-label mid fade s0" x="530" y="268" style="transition-delay:.9s">esperienza</text>
+<text class="t-serif mid fade s0" x="230" y="240" style="transition-delay:.6s">Organismo</text>
+<text class="t-serif mid fade s0" x="530" y="240" style="transition-delay:.75s">Ambiente</text>
 <path class="green-stroke draw s1" pathLength="1" d="M262 122 C330 24 430 24 498 122"/>
 <path class="green-stroke fade s1" style="transition-delay:.9s" d="${head(498,122,68,98)}"/>
 <text class="t-label green mid fade s1" x="380" y="26" style="transition-delay:.4s">agisce</text>
@@ -407,7 +405,7 @@ html:copy('La teoria stadiale','Quattro<br><em>stadi</em>',{sub:'Sequenza invari
 <line x1="${x}" y1="${top}" x2="${x+180}" y2="${top}" stroke="var(--accent)" stroke-width="4"/>
 <text class="t-label green" x="${x+14}" y="${top+38}" font-size="13">${age}</text>
 <text class="t-serif fit" x="${x+14}" y="${top+76}" font-size="20">${a}</text>${b?`<text class="t-serif fit" x="${x+14}" y="${top+106}" font-size="20">${b}</text>`:''}
-<text class="t-cap green" x="${x+2}" y="${top-20}" font-size="28">${verb}</text></g>`}).join(''))),
+<text class="t-cap green" x="${x+2}" y="${top-20}" font-size="21">${verb}</text></g>`}).join(''))),
 apply(n){$$('.fit').forEach(e=>{if(e.getComputedTextLength()>158)e.setAttribute('textLength',158)});$$('.st').forEach(g=>g.classList.toggle('on',+g.dataset.i<=n))}});}
 
 /* 17 · Sensomotorio: permanenza dell'oggetto */
