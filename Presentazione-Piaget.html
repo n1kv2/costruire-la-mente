@@ -286,13 +286,11 @@ apply(n){on('.s0');on('.s1',n>=1)}});}
 slide({gap:2800,steps:2,
 html:copy('Ritorno al punto di partenza','Dalla specie<br>all’<em>individuo</em>',{sub:'Il filo comune: organismo, ambiente, adattamento.'})+vis(svg(760,600,`
 <style>#gF,#gO{transition:opacity 1.4s var(--ease),transform 1.4s var(--ease)}#gO{transform-origin:575px 340px}.dimF #gF{opacity:.08}.dimF #gO{transform:scale(1.1)}</style>
-<g id="fo">${FO(false)}</g>
-<text id="foCap" class="t-cap mid" x="380" y="28"></text>`)),
+<g id="fo">${FO(false)}</g>`)),
 apply(n,inst){$('#fo').classList.toggle('dimF',n>=1);
-  const c=n?['…all’individuo','t-cap mid warm']:['dalla specie…','t-cap mid green'];
-  if(inst){setText('#foCap',...c);setTag(n?'onto':'');return}
-  if(n===0){setText('#foCap',...c);setTag('')}
-  else{setText('#foCap',...c);later(()=>setTag('onto'),1500)}}});
+  if(inst){setTag(n?'onto':'');return}
+  if(n===0)setTag('');
+  else later(()=>setTag('onto'),1500)}});
 
 /* 9 · Innato o appreso? da Platone a Baldwin */
 slide({gap:2600,steps:4,
